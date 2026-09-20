@@ -1,0 +1,920 @@
+/*
+ * Interfaccia pensata per il campo, non per la scrivania.
+ *
+ *  - bersagli di almeno 56 px: si usa con i guanti
+ *  - contrasto alto e niente grigi tenui: si legge in pieno sole
+ *  - comandi principali in basso: si arriva con il pollice di una mano sola
+ *  - niente animazioni inutili: i telefoni in campagna sono vecchi
+ */
+
+:root {
+  --verde: #1b5e20;
+  --verde-chiaro: #2e7d32;
+  --verde-tenue: #e8f0e6;
+
+  --carta: #f7f5f0;
+  --superficie: #ffffff;
+  --bordo: #d4cfc4;
+  --testo: #1a1a1a;
+  --testo-tenue: #565248;
+
+  --rosso: #b3261e;
+  --rosso-tenue: #fce8e6;
+  --ambra: #9a6700;
+  --ambra-tenue: #fff4d6;
+  --blu: #0b5394;
+
+  --raggio: 12px;
+  --bersaglio: 56px;
+  --spazio: 16px;
+
+  --ombra: 0 1px 3px rgba(0, 0, 0, 0.14);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--carta);
+  color: var(--testo);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+  /* In campo lo schermo si legge peggio: niente testo sottile. */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------------------------------------------ guscio */
+
+.guscio {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--carta);
+}
+
+.testata {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px var(--spazio);
+  background: var(--verde);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.testata h1 {
+  font-size: 19px;
+  margin: 0;
+  font-weight: 650;
+}
+
+.contenuto {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spazio);
+  padding-bottom: 96px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Barra inferiore: si raggiunge col pollice, anche con una mano sola. */
+.barra-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--superficie);
+  border-top: 2px solid var(--bordo);
+  max-width: 720px;
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 20;
+}
+
+.barra-nav a {
+  flex: 1;
+  min-height: var(--bersaglio);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--testo-tenue);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 4px;
+  position: relative;
+}
+
+.barra-nav a.attivo {
+  color: var(--verde);
+  background: var(--verde-tenue);
+}
+
+.barra-nav .icona {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* Il punto esclamativo chiesto: deve vedersi senza cercarlo. */
+.pallino {
+  position: absolute;
+  top: 6px;
+  right: 50%;
+  transform: translateX(22px);
+  background: var(--rosso);
+  color: #fff;
+  border-radius: 999px;
+  min-width: 20px;
+  height: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+/* ----------------------------------------------------------------- schede */
+
+.scheda {
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  padding: var(--spazio);
+  margin-bottom: 12px;
+  box-shadow: var(--ombra);
+}
+
+.scheda-cliccabile {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.scheda-cliccabile:active {
+  background: var(--verde-tenue);
+}
+
+.titolo-sezione {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--testo-tenue);
+  margin: 22px 0 10px;
+}
+
+.titolo-sezione:first-child {
+  margin-top: 0;
+}
+
+/* ---------------------------------------------------------------- pulsanti */
+
+button,
+.pulsante {
+  font: inherit;
+  min-height: var(--bersaglio);
+  border-radius: var(--raggio);
+  border: 2px solid transparent;
+  padding: 12px 20px;
+  font-weight: 650;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.pulsante-principale {
+  background: var(--verde);
+  color: #fff;
+  width: 100%;
+}
+
+.pulsante-principale:active {
+  background: var(--verde-chiaro);
+}
+
+.pulsante-secondario {
+  background: var(--superficie);
+  color: var(--verde);
+  border-color: var(--verde);
+  width: 100%;
+}
+
+.pulsante-pericolo {
+  background: var(--superficie);
+  color: var(--rosso);
+  border-color: var(--rosso);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Griglia delle azioni rapide: il gesto più frequente in due tocchi. */
+.azioni-rapide {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.azione-rapida {
+  background: var(--superficie);
+  border: 2px solid var(--bordo);
+  border-radius: var(--raggio);
+  min-height: 92px;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--testo);
+  font-size: 15px;
+}
+
+.azione-rapida .icona {
+  font-size: 28px;
+}
+
+.azione-rapida:active {
+  border-color: var(--verde);
+  background: var(--verde-tenue);
+}
+
+/* ------------------------------------------------------------------ campi */
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--testo-tenue);
+  margin-bottom: 6px;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  width: 100%;
+  min-height: var(--bersaglio);
+  padding: 12px 14px;
+  border: 2px solid var(--bordo);
+  border-radius: var(--raggio);
+  background: var(--superficie);
+  color: var(--testo);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--verde);
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.gruppo-campo {
+  margin-bottom: 18px;
+}
+
+.riga-campi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.aiuto {
+  font-size: 13px;
+  color: var(--testo-tenue);
+  margin-top: 6px;
+}
+
+/* --------------------------------------------------------------- avvisi */
+
+.avviso {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: var(--raggio);
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 2px solid;
+  text-decoration: none;
+  color: inherit;
+}
+
+.avviso-scaduto {
+  background: var(--rosso-tenue);
+  border-color: var(--rosso);
+}
+
+.avviso-in_scadenza {
+  background: var(--ambra-tenue);
+  border-color: var(--ambra);
+}
+
+.avviso-ok {
+  background: var(--verde-tenue);
+  border-color: var(--verde-chiaro);
+}
+
+.avviso .icona {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.avviso strong {
+  display: block;
+}
+
+.avviso small {
+  color: var(--testo-tenue);
+}
+
+/* Fascia della carenza: è il primo dato che l'agricoltore deve vedere. */
+.fascia-carenza {
+  border-radius: var(--raggio);
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 2px solid;
+  font-weight: 600;
+}
+
+.carenza-bloccata {
+  background: var(--rosso-tenue);
+  border-color: var(--rosso);
+  color: var(--rosso);
+}
+
+.carenza-libera {
+  background: var(--verde-tenue);
+  border-color: var(--verde-chiaro);
+  color: var(--verde);
+}
+
+.carenza-incompleta {
+  background: var(--ambra-tenue);
+  border-color: var(--ambra);
+  color: var(--ambra);
+}
+
+/* ------------------------------------------------------------- nota vocale */
+
+.bottone-voce {
+  width: 100%;
+  min-height: 96px;
+  border-radius: var(--raggio);
+  border: 3px dashed var(--verde);
+  background: var(--verde-tenue);
+  color: var(--verde);
+  font-size: 17px;
+  font-weight: 700;
+  flex-direction: column;
+  gap: 6px;
+  touch-action: none;
+  user-select: none;
+}
+
+.bottone-voce.registra {
+  background: var(--rosso);
+  border-style: solid;
+  border-color: var(--rosso);
+  color: #fff;
+  animation: pulsa 1.2s ease-in-out infinite;
+}
+
+@keyframes pulsa {
+  50% {
+    opacity: 0.78;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottone-voce.registra {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------- rilievi */
+
+.rilievo {
+  border-left: 5px solid;
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: var(--superficie);
+}
+
+.rilievo-blocco {
+  border-color: var(--rosso);
+  background: var(--rosso-tenue);
+}
+
+.rilievo-avviso {
+  border-color: var(--ambra);
+  background: var(--ambra-tenue);
+}
+
+.rilievo-nota {
+  border-color: var(--blu);
+  background: #eaf1f8;
+}
+
+.rilievo small {
+  display: block;
+  margin-top: 4px;
+  color: var(--testo-tenue);
+}
+
+/* ---------------------------------------------------------------- varie */
+
+.elenco-vuoto {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--testo-tenue);
+}
+
+.elenco-vuoto .icona {
+  font-size: 44px;
+  display: block;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.riga-dato {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bordo);
+}
+
+.riga-dato:last-child {
+  border-bottom: none;
+}
+
+.riga-dato .etichetta {
+  color: var(--testo-tenue);
+}
+
+.riga-dato .valore {
+  font-weight: 650;
+  text-align: right;
+}
+
+.striscia-offline {
+  background: var(--ambra-tenue);
+  color: var(--ambra);
+  border-bottom: 2px solid var(--ambra);
+  padding: 8px var(--spazio);
+  font-size: 14px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.etichetta-piccola {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--verde-tenue);
+  color: var(--verde);
+}
+
+.etichetta-bozza {
+  background: var(--ambra-tenue);
+  color: var(--ambra);
+}
+
+.pila > * + * {
+  margin-top: 12px;
+}
+
+.link-testo {
+  background: none;
+  border: none;
+  color: var(--blu);
+  font-weight: 650;
+  padding: 8px 0;
+  min-height: auto;
+  text-decoration: underline;
+}
+
+/* ==================================================================
+ * Nuovo impianto: quaderno di note e piastrelle
+ * ================================================================== */
+
+/* ------------------------------------------------------------ barre */
+
+.barra-alta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px var(--spazio);
+  background: var(--verde);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-height: 54px;
+}
+
+.barra-titolo {
+  font-size: 19px;
+  font-weight: 650;
+}
+
+.barra-indietro {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 650;
+  padding: 6px 4px;
+  min-height: 44px;
+  gap: 4px;
+}
+
+.barra-destra {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.meteo-oggi {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.barra-allarme {
+  position: relative;
+  font-size: 22px;
+  text-decoration: none;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.65;
+}
+
+.barra-allarme.acceso {
+  opacity: 1;
+}
+
+.barra-allarme .pallino {
+  top: 2px;
+  right: 0;
+  transform: none;
+}
+
+/* Sotto le cose che si toccano: il pollice arriva qui. */
+.barra-bassa {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--superficie);
+  border-top: 2px solid var(--bordo);
+  max-width: 720px;
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 20;
+}
+
+.barra-bassa a {
+  flex: 1;
+  min-height: var(--bersaglio);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--testo-tenue);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 4px;
+}
+
+.barra-bassa a.attivo {
+  color: var(--verde);
+  background: var(--verde-tenue);
+}
+
+.barra-bassa .icona {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.barra-bassa .azione-principale {
+  color: var(--verde);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------- piastrelle */
+
+.piastrelle {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/*
+ * Icona quadrata a sinistra, testo allineato a sinistra accanto.
+ * Se si vuole il quadrato a destra basta invertire `flex-direction`.
+ */
+.piastrella {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  min-height: 104px;
+  background: var(--superficie);
+  border: 2px solid var(--bordo);
+  border-radius: var(--raggio);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--ombra);
+}
+
+.piastrella:active {
+  border-color: var(--verde);
+  background: var(--verde-tenue);
+}
+
+.piastrella-icona {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--raggio);
+  background: var(--verde-tenue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+}
+
+.piastrella-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.piastrella-titolo {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.piastrella-descrizione {
+  font-size: 14px;
+  color: var(--testo-tenue);
+}
+
+.piastrella-stato {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--verde);
+  margin-top: 2px;
+}
+
+.piastrella-gialla {
+  border-color: var(--ambra);
+  background: var(--ambra-tenue);
+}
+
+.piastrella-gialla .piastrella-icona {
+  background: #fbe6b4;
+}
+
+.piastrella-gialla .piastrella-stato {
+  color: var(--ambra);
+}
+
+.piastrella-rossa {
+  border-color: var(--rosso);
+  background: var(--rosso-tenue);
+}
+
+.piastrella-rossa .piastrella-icona {
+  background: #f8d2cf;
+}
+
+.piastrella-rossa .piastrella-stato {
+  color: var(--rosso);
+}
+
+/* --------------------------------------------------- azioni pagina */
+
+.azioni-pagina {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.azioni-pagina > * {
+  flex: 1;
+}
+
+/* ---------------------------------------------------------- scrivere */
+
+/* Dove: piccolo, in cima, si può saltare. */
+.campo-campo {
+  font-size: 16px;
+  min-height: 50px;
+  margin-bottom: 12px;
+  background: var(--carta);
+}
+
+/* Cosa: grande. È questa la nota. */
+.campo-nota {
+  min-height: 220px;
+  font-size: 19px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+/* ------------------------------------------------------------- note */
+
+.nota {
+  padding: 14px 16px;
+}
+
+.nota-intestazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nota-data {
+  font-weight: 700;
+  color: var(--verde);
+}
+
+.nota-testo {
+  margin: 8px 0 0;
+  /* Nell'elenco si vedono tre righe: quanto basta per riconoscerla. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nota-testo-intero {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.nota-piede {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 15px;
+  flex-wrap: wrap;
+}
+
+.nota-modificata {
+  font-size: 12px;
+  color: var(--testo-tenue);
+  margin-left: auto;
+}
+
+/* -------------------------------------------------------- etichette */
+
+.etichette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.etichetta-scelta {
+  font-size: 14px;
+  font-weight: 650;
+  padding: 9px 14px;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 2px solid var(--bordo);
+  background: var(--superficie);
+  color: var(--testo-tenue);
+  /* Il tedesco è lungo il doppio dell'italiano: mai larghezze fisse. */
+  white-space: normal;
+}
+
+.etichetta-scelta.attiva {
+  border-color: var(--verde);
+  background: var(--verde-tenue);
+  color: var(--verde);
+}
+
+/* --------------------------------------------------------- documenti */
+
+.foto-documento {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: var(--raggio);
+  border: 1px solid var(--bordo);
+  background: var(--carta);
+  margin: 12px 0;
+}
+
+/* ------------------------------------------------- lettura dei documenti */
+
+.barra-progresso {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bordo);
+  overflow: hidden;
+  margin: 12px 0 6px;
+}
+
+.barra-progresso > div {
+  height: 100%;
+  background: var(--verde);
+  transition: width 0.2s linear;
+}
+
+.dato-letto {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bordo);
+}
+
+.dato-letto:last-of-type {
+  border-bottom: none;
+}
+
+/* Da quale riga viene il dato: è così che si controlla in due secondi. */
+.riga-origine {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--testo-tenue);
+  font-style: italic;
+  word-break: break-word;
+}
+
+.bollino-fiducia {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--verde-tenue);
+  color: var(--verde);
+  vertical-align: middle;
+}
+
+.bollino-fiducia.incerto {
+  background: var(--ambra-tenue);
+  color: var(--ambra);
+}
+
+.testo-grezzo {
+  margin: 10px 0 0;
+  padding: 12px;
+  background: var(--carta);
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  max-height: 260px;
+  overflow: auto;
+}
