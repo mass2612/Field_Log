@@ -38,7 +38,40 @@ npm run typecheck  # controllo dei tipi
 
 ---
 
-## Provare dal telefono
+## L'app è online
+
+**https://mass2612.github.io/Field_Log/**
+
+Si apre da qualunque telefono, senza scaricare niente e senza il PC acceso.
+Su Android, dal menù di Chrome, *Aggiungi a schermata Home*: da lì in poi ha la
+sua icona e si apre a schermo intero. Su iPhone lo stesso, dal tasto Condividi.
+
+Da sapere prima di girarlo a qualcuno:
+
+- **Ognuno ha il suo quaderno.** I dati restano nel telefono di chi apre il
+  link: non c'è nessun server, niente viene condiviso e tu non vedi quello che
+  scrivono loro. Per provarla in due sullo stesso quaderno servirebbe la
+  sincronizzazione, che non c'è ancora.
+- **Il codice sorgente è pubblico**, perché GitHub Pages gratis funziona solo
+  così. Chi vuole può leggerlo e copiarlo.
+
+Per ripubblicare dopo una modifica:
+
+```bash
+npm run pubblica
+```
+
+Il link resta lo stesso, e chi l'ha installato si ritrova la versione nuova.
+
+> La pubblicazione automatica a ogni modifica è già scritta in
+> `.github/workflows/pubblica.yml`, ma per caricarla su GitHub serve un
+> permesso in più sul token: `gh auth refresh -s workflow`. Fatto quello, si
+> toglie `.github/workflows/` dal `.gitignore` e non serve più lanciare niente
+> a mano.
+
+---
+
+## Provare dal telefono senza pubblicare
 
 **Non c'è niente da scaricare, e l'app non è su nessuno store.** È una pagina web:
 il telefono deve solo riuscire a raggiungere il computer su cui gira.

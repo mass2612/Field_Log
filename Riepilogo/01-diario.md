@@ -7,6 +7,43 @@ Voce più recente in cima.
 
 ---
 
+## 20 settembre 2026 (sera) — L'app è online
+
+**https://mass2612.github.io/Field_Log/** — deposito `mass2612/Field_Log`.
+
+**Deciso: GitHub Pages, deposito pubblico.** GitHub Pages gratis funziona solo
+da depositi pubblici; un deposito privato è gratis, ma pubblicarci un sito
+richiede un piano a pagamento *(circa 4 $/mese, da verificare)*. Alternativa
+gratuita col codice privato: Cloudflare Pages o Netlify.
+
+Avvertenza messa agli atti: **cancellare un deposito pubblico non ripubblica
+indietro niente.** Chi l'ha clonato se lo tiene, e la cronologia git conserva
+tutto anche svuotando i file. Il "poi lo togliamo" non è un annulla.
+
+**Fatto: percorso base configurabile** (`BASE_PATH`). Su GitHub Pages il sito
+sta in `/Field_Log/`, su un dominio proprio starebbe alla radice: lo stesso
+codice va bene in tutti e due i casi. `start_url` e `scope` del manifesto
+seguono la stessa variabile, altrimenti l'icona sulla schermata Home aprirebbe
+una pagina bianca.
+
+**Fatto: `npm run pubblica`** — costruisce e manda sul ramo `gh-pages`.
+Il workflow che farebbe tutto da solo a ogni modifica è scritto, ma per
+caricarlo serve il permesso `workflow` sul token: `gh auth refresh -s workflow`.
+Finché manca, `.github/workflows/` resta nel `.gitignore`.
+
+**Da ricordare quando si gira il link a qualcuno:** ognuno si ritrova il
+**proprio** quaderno vuoto, perché i dati stanno nel suo telefono. Non c'è
+nessun server e niente è condiviso. Per provare in due sullo stesso quaderno
+servirebbe la sincronizzazione, che non c'è.
+
+**Domini:** valutato l'acquisto di `quadernodicampagna.de` su Hetzner (€ 5,98).
+Non serve per provare l'app. Se si compra, il `.de` è il dominio nazionale
+tedesco: per un prodotto europeo `.eu`, `.com` o `.it` raccontano meglio la
+cosa. Nella maschera di Hetzner, la casella *"custom DNS servers"* **non va
+spuntata**: serve solo a chi ha già server DNS propri.
+
+---
+
 ## 20 settembre 2026 — Il modulo che legge i documenti
 
 **Fatto: la lettura automatica funziona, e gira sul telefono.**
