@@ -3,3 +3,9 @@ dist
 dev-dist
 .DS_Store
 *.local
+.pubblicazione/
+
+# Il workflow si carica solo con il permesso "workflow" sul token GitHub:
+#   gh auth refresh -s workflow
+# Finché non lo si aggiunge si pubblica con: npm run pubblica
+.github/workflows/
