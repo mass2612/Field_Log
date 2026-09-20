@@ -32,6 +32,15 @@ export interface Tracciato {
    */
   annullatoIl?: Istante
   motivoAnnullamento?: string
+
+  /**
+   * Roba nata in fase di prova: dati dimostrativi, fatture finte, tentativi.
+   *
+   * Serve a poterla togliere tutta insieme il giorno che l'azienda comincia a
+   * usare l'app sul serio. Un quaderno vero che si porta dietro la "Vigna sotto
+   * casa" inventata non è un quaderno di cui ci si fida.
+   */
+  dimostrativo?: boolean
 }
 
 // ---------------------------------------------------------------------------

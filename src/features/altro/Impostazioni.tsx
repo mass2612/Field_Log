@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
 import type { Azienda } from '../../core/domain/types'
 import { db, oggi } from '../../core/db/db'
@@ -9,6 +10,7 @@ import { scaricaCsv, scaricaJson, toCsv } from '../../core/export/csv'
 import { giacenzePerLotto } from '../../core/db/query'
 import { LINGUE, getLingua, impostaLingua, t, type Lingua } from '../../core/i18n'
 import { caricaDatiDimostrativi } from '../../core/db/dimostrativo'
+import { contaRighe, eliminaDatiDimostrativi, svuotaTutto } from '../../core/db/pulizia'
 
 export default function Impostazioni({ azienda }: { azienda: Azienda }) {
   const [nome, setNome] = useState(azienda.nome)
@@ -65,47 +67,29 @@ export default function Impostazioni({ azienda }: { azienda: Azienda }) {
    * per intero, in un formato leggibile, senza chiedere permesso a nessuno.
    */
   async function esportaTutto() {
-    const [
-      aziende,
-      campi,
-      colture,
-      operatori,
-      attrezzi,
-      documenti,
-      prodotti,
-      lotti,
-      movimenti,
-      interventi,
-      rettifiche,
-    ] = await Promise.all([
-      db.aziende.toArray(),
-      db.campi.toArray(),
-      db.colture.toArray(),
-      db.operatori.toArray(),
-      db.attrezzi.toArray(),
-      db.documenti.toArray(),
-      db.prodotti.toArray(),
-      db.lotti.toArray(),
-      db.movimenti.toArray(),
-      db.interventi.toArray(),
-      db.rettifiche.toArray(),
-    ])
+    /*
+     * Si scorrono le tabelle del database invece di elencarle a mano.
+     *
+     * La versione precedente le elencava una per una e **si era dimenticata le
+     * note** — cioè proprio il dato principale dell'app. Chi avesse salvato una
+     * copia prima di svuotare avrebbe perso tutto il quaderno. Elencare a mano
+     * un insieme che cresce è un errore che si ripete: meglio chiederlo al
+     * database, che le sa sempre tutte.
+     */
+    const contenuto: Record<string, unknown[]> = {}
+
+    for (const tabella of db.tables) {
+      // Le foto e gli audio restano fuori: in JSON non ci stanno, e
+      // gonfierebbero il file fino a renderlo inapribile.
+      if (tabella.name === 'allegati') continue
+      contenuto[tabella.name] = await tabella.toArray()
+    }
 
     scaricaJson(`quaderno-completo-${oggi()}.json`, {
       esportatoIl: new Date().toISOString(),
-      versioneFormato: 1,
-      aziende,
-      campi,
-      colture,
-      operatori,
-      attrezzi,
-      documenti,
-      prodotti,
-      lotti,
-      movimenti,
-      // Gli allegati (audio e foto) restano fuori: vanno esportati a parte.
-      interventi,
-      rettifiche,
+      versioneFormato: 2,
+      avvertenza: 'Foto e audio non sono inclusi: restano nel dispositivo.',
+      ...contenuto,
     })
   }
 
@@ -264,6 +248,97 @@ export default function Impostazioni({ azienda }: { azienda: Azienda }) {
       </p>
 
       {messaggio && <p className="aiuto" style={{ color: 'var(--verde)' }}>{messaggio}</p>}
+
+      <FarePiazzaPulita onEsporta={() => void esportaTutto()} />
+    </>
+  )
+}
+
+/**
+ * Il passaggio dalla prova all'uso vero.
+ *
+ * Un quaderno vero che si porta dietro la "Vigna sotto casa" inventata in fase
+ * di prova non è un quaderno di cui ci si fida — e davanti a un controllo è
+ * peggio che inutile. Quindi due comandi distinti: togliere solo il finto, o
+ * ripartire da zero.
+ */
+function FarePiazzaPulita({ onEsporta }: { onEsporta: () => void }) {
+  const [conferma, setConferma] = useState<'niente' | 'dimostrativi' | 'tutto'>('niente')
+  const [esito, setEsito] = useState<string | null>(null)
+
+  const conteggi = useLiveQuery(() => contaRighe(), [])
+  const dimostrativi = (conteggi ?? []).reduce((s, c) => s + c.dimostrativi, 0)
+  const totali = (conteggi ?? []).reduce((s, c) => s + c.totali, 0)
+
+  return (
+    <>
+      <h2 className="titolo-sezione">Quando si comincia sul serio</h2>
+
+      <div className="scheda">
+        <p className="aiuto" style={{ marginTop: 0 }}>
+          Nel telefono ci sono <strong>{totali}</strong> righe, di cui{' '}
+          <strong>{dimostrativi}</strong> nate dai dati dimostrativi. I dati stanno solo qui:
+          svuotare non tocca nessun altro telefono.
+        </p>
+
+        {esito && <p className="aiuto" style={{ color: 'var(--verde)' }}>{esito}</p>}
+
+        {conferma === 'niente' && (
+          <div className="pila">
+            <button
+              className="pulsante-secondario"
+              onClick={() => setConferma('dimostrativi')}
+              disabled={dimostrativi === 0}
+            >
+              🧹 Togli solo i dati dimostrativi ({dimostrativi})
+            </button>
+            <button className="pulsante-pericolo" onClick={() => setConferma('tutto')}>
+              🗑️ Svuota tutto il quaderno
+            </button>
+          </div>
+        )}
+
+        {conferma !== 'niente' && (
+          <div className="rilievo rilievo-blocco">
+            <strong>
+              {conferma === 'tutto'
+                ? `Cancello tutte le ${totali} righe, foto e audio compresi. Non si torna indietro.`
+                : `Tolgo le ${dimostrativi} righe dimostrative. Quello che hai scritto tu resta.`}
+            </strong>
+            <small>Se non sei sicuro, salva prima una copia di tutto.</small>
+
+            <div className="pila" style={{ marginTop: 12 }}>
+              <button className="pulsante-secondario" onClick={onEsporta}>
+                💾 Prima salvo una copia
+              </button>
+              <button
+                className="pulsante-pericolo"
+                onClick={async () => {
+                  if (conferma === 'tutto') {
+                    await svuotaTutto()
+                    location.reload()
+                  } else {
+                    const quante = await eliminaDatiDimostrativi()
+                    setEsito(`Tolte ${quante} righe dimostrative.`)
+                    setConferma('niente')
+                  }
+                }}
+              >
+                Sì, procedi
+              </button>
+              <button className="pulsante-secondario" onClick={() => setConferma('niente')}>
+                Lascia stare
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <p className="aiuto">
+        Per provare la lettura delle fatture usa il <strong>banco di prova</strong>: legge e
+        mostra il risultato, ma <strong>non salva niente</strong>. Così puoi fare tutte le prove
+        che vuoi senza sporcare il quaderno.
+      </p>
     </>
   )
 }

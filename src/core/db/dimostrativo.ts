@@ -411,6 +411,10 @@ export async function caricaDatiDimostrativi(aziendaId: ID): Promise<void> {
   )
 }
 
+/**
+ * Ogni riga nasce marcata come dimostrativa, così il giorno che si comincia sul
+ * serio si può togliere tutta la roba finta in un colpo senza toccare il resto.
+ */
 function nuovo<T extends Tracciato>(dati: Omit<T, keyof Tracciato>): T {
-  return traccia(dati) as T
+  return { ...traccia(dati), dimostrativo: true } as T
 }
