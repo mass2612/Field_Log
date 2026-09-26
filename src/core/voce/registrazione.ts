@@ -5,36 +5,81 @@
  * è un comodo di lettura, l'audio è la prova. Se la trascrizione sbaglia il nome
  * di un prodotto, il registro sarebbe falso: l'audio permette sempre di rimediare.
  *
- * Tre livelli, in ordine di affidabilità crescente:
- *   1. audio                    — sempre, anche senza rete
- *   2. trascrizione immediata   — quando il dispositivo la offre
- *   3. trascrizione dal server  — più accurata, in coda finché non torna la linea
- *
  * Avvertenza tecnica: la Web Speech API di Chrome *non* è locale, manda l'audio
  * ai server di Google e senza rete non funziona. Per una vera trascrizione
  * offline servirà un modello incorporato nell'app (Whisper compilato in WASM o
- * simili): è previsto, non è ancora qui. Finché non c'è, senza rete si registra
- * l'audio e la trascrizione resta in coda.
+ * simili): è previsto, non è ancora qui.
+ *
+ * Seconda avvertenza, imparata sbagliando: quando la trascrizione non riesce,
+ * **il motivo va detto per quello che è.** La prima versione scriveva sempre
+ * "manca la rete", anche quando la rete c'era e il problema era un altro. Un
+ * messaggio che indovina la causa fa perdere ore a chi lo legge.
  */
 
 export type StatoRegistrazione = 'ferma' | 'in_corso' | 'elaborazione'
+
+/** Perché la trascrizione non c'è. Mai tirare a indovinare. */
+export type MotivoMancataTrascrizione =
+  | 'non_supportato'
+  | 'senza_rete'
+  | 'servizio_irraggiungibile'
+  | 'permesso_negato'
+  | 'microfono_occupato'
+  | 'nessun_parlato'
+  | 'troppo_breve'
+  | 'sconosciuto'
+
+export function spiegaMotivo(motivo: MotivoMancataTrascrizione): string {
+  switch (motivo) {
+    case 'non_supportato':
+      return 'Questo browser non sa trascrivere. Su Android funziona con Chrome.'
+    case 'senza_rete':
+      return 'Il telefono risulta senza rete: la trascrizione ha bisogno della linea.'
+    case 'servizio_irraggiungibile':
+      return 'La rete c’è, ma il servizio di trascrizione non ha risposto. Riprova fra poco.'
+    case 'permesso_negato':
+      return 'Manca il permesso per il microfono. Vai nelle impostazioni del sito e concedilo.'
+    case 'microfono_occupato':
+      return 'Il microfono era occupato da un’altra applicazione.'
+    case 'nessun_parlato':
+      return 'Non ho sentito parlare: forse il pulsante si è rilasciato troppo presto.'
+    case 'troppo_breve':
+      return 'Registrazione troppo breve. Tieni premuto finché hai finito di parlare.'
+    case 'sconosciuto':
+      return 'Trascrizione non riuscita, e non sono riuscito a capire perché.'
+  }
+}
 
 export interface EsitoRegistrazione {
   blob: Blob
   durataSec: number
   tipoMime: string
-  /** Presente solo se il riconoscimento vocale era disponibile in quel momento. */
+  /** Presente solo se il riconoscimento vocale ha funzionato. */
   trascrizioneImmediata?: string
+  /** Presente quando la trascrizione manca: dice **perché**. */
+  motivo?: MotivoMancataTrascrizione
+}
+
+interface RisultatoRiconoscimento {
+  isFinal: boolean
+  0: { transcript: string }
+}
+
+interface EventoRisultato {
+  resultIndex: number
+  results: ArrayLike<RisultatoRiconoscimento>
 }
 
 interface RiconoscimentoVocale extends EventTarget {
   lang: string
   continuous: boolean
   interimResults: boolean
+  maxAlternatives: number
   start(): void
   stop(): void
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
-  onerror: ((e: unknown) => void) | null
+  abort(): void
+  onresult: ((e: EventoRisultato) => void) | null
+  onerror: ((e: { error?: string }) => void) | null
   onend: (() => void) | null
 }
 
@@ -49,7 +94,13 @@ function creaRiconoscimento(lingua: string): RiconoscimentoVocale | null {
   const r = new Costruttore()
   r.lang = lingua
   r.continuous = true
-  r.interimResults = false
+  /*
+   * I risultati provvisori servono davvero: su una frase corta il risultato
+   * definitivo spesso non fa in tempo ad arrivare prima che si rilasci il
+   * pulsante. Meglio un testo provvisorio da rileggere che niente.
+   */
+  r.interimResults = true
+  r.maxAlternatives = 1
   return r
 }
 
@@ -57,15 +108,31 @@ export function trascrizioneImmediataDisponibile(): boolean {
   return creaRiconoscimento('it-IT') !== null && navigator.onLine
 }
 
-/**
- * Registratore. Pensato per il pulsante "tieni premuto e parla": si avvia al
- * tocco, si ferma al rilascio, senza schermate intermedie.
- */
+/** Codici della Web Speech API tradotti in cause comprensibili. */
+function motivoDaCodice(codice?: string): MotivoMancataTrascrizione {
+  switch (codice) {
+    case 'network':
+      return 'servizio_irraggiungibile'
+    case 'not-allowed':
+    case 'service-not-allowed':
+      return 'permesso_negato'
+    case 'audio-capture':
+      return 'microfono_occupato'
+    case 'no-speech':
+      return 'nessun_parlato'
+    default:
+      return 'sconosciuto'
+  }
+}
+
 export class RegistratoreVocale {
   private mediaRecorder: MediaRecorder | null = null
   private pezzi: Blob[] = []
   private riconoscimento: RiconoscimentoVocale | null = null
-  private testo = ''
+  private testoFinale = ''
+  private testoProvvisorio = ''
+  private motivo: MotivoMancataTrascrizione | undefined
+  private fineRiconoscimento: Promise<void> = Promise.resolve()
   private iniziatoIl = 0
   private flusso: MediaStream | null = null
 
@@ -78,7 +145,9 @@ export class RegistratoreVocale {
 
     this.flusso = await navigator.mediaDevices.getUserMedia({ audio: true })
     this.pezzi = []
-    this.testo = ''
+    this.testoFinale = ''
+    this.testoProvvisorio = ''
+    this.motivo = undefined
     this.iniziatoIl = Date.now()
 
     const tipoMime = this.scegliTipoMime()
@@ -89,28 +158,60 @@ export class RegistratoreVocale {
     this.mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) this.pezzi.push(e.data)
     }
-    this.mediaRecorder.start(1000)
+    this.mediaRecorder.start(500)
 
-    // Il riconoscimento è un di più: se fallisce, la registrazione prosegue.
+    this.avviaRiconoscimento()
+    this.stato = 'in_corso'
+  }
+
+  private avviaRiconoscimento(): void {
     this.riconoscimento = creaRiconoscimento(this.lingua)
-    if (this.riconoscimento && navigator.onLine) {
-      this.riconoscimento.onresult = (e) => {
-        for (let i = 0; i < e.results.length; i++) {
-          const alternativa = e.results[i][0]
-          if (alternativa?.transcript) this.testo += alternativa.transcript + ' '
-        }
-      }
-      this.riconoscimento.onerror = () => {
-        this.riconoscimento = null
-      }
-      try {
-        this.riconoscimento.start()
-      } catch {
-        this.riconoscimento = null
-      }
+
+    if (!this.riconoscimento) {
+      this.motivo = 'non_supportato'
+      return
+    }
+    if (!navigator.onLine) {
+      this.motivo = 'senza_rete'
+      this.riconoscimento = null
+      return
     }
 
-    this.stato = 'in_corso'
+    // Si tiene una promessa che si chiude quando il riconoscimento ha finito:
+    // i risultati arrivano dopo lo `stop()`, e leggere il testo subito
+    // significava leggerlo sempre vuoto. Era il difetto principale.
+    let chiudi: () => void = () => {}
+    this.fineRiconoscimento = new Promise<void>((risolvi) => {
+      chiudi = risolvi
+    })
+
+    this.riconoscimento.onresult = (e) => {
+      // Si riparte da `resultIndex`, non da zero: altrimenti a ogni evento si
+      // riscrivevano anche i pezzi già presi, e il testo usciva triplicato.
+      let provvisorio = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const risultato = e.results[i]
+        const testo = risultato[0]?.transcript ?? ''
+        if (risultato.isFinal) this.testoFinale += testo + ' '
+        else provvisorio += testo
+      }
+      this.testoProvvisorio = provvisorio
+    }
+
+    this.riconoscimento.onerror = (e) => {
+      this.motivo = motivoDaCodice(e?.error)
+      chiudi()
+    }
+
+    this.riconoscimento.onend = () => chiudi()
+
+    try {
+      this.riconoscimento.start()
+    } catch {
+      this.motivo = 'sconosciuto'
+      this.riconoscimento = null
+      chiudi()
+    }
   }
 
   async ferma(): Promise<EsitoRegistrazione> {
@@ -127,30 +228,41 @@ export class RegistratoreVocale {
       registratore.stop()
     })
 
+    // Si chiede al riconoscimento di concludere e **lo si aspetta**, ma non
+    // all'infinito: se entro due secondi non ha finito si prende quello che c'è.
     try {
       this.riconoscimento?.stop()
     } catch {
-      /* il riconoscimento può essere già chiuso: non è un problema */
+      /* può essere già chiuso: non è un problema */
     }
+    await Promise.race([this.fineRiconoscimento, attendi(2000)])
 
     this.flusso?.getTracks().forEach((t) => t.stop())
     this.flusso = null
     this.mediaRecorder = null
     this.stato = 'ferma'
 
-    const trascrizione = this.testo.trim()
+    const durataSec = Math.round((Date.now() - this.iniziatoIl) / 1000)
+    const trascrizione = (this.testoFinale + ' ' + this.testoProvvisorio).trim()
+
+    let motivo = this.motivo
+    if (!trascrizione && !motivo) {
+      motivo = durataSec < 1 ? 'troppo_breve' : 'nessun_parlato'
+    }
+
     return {
       blob,
-      durataSec: Math.round((Date.now() - this.iniziatoIl) / 1000),
+      durataSec,
       tipoMime,
       trascrizioneImmediata: trascrizione.length > 0 ? trascrizione : undefined,
+      motivo: trascrizione.length > 0 ? undefined : motivo,
     }
   }
 
   annulla(): void {
     try {
       this.mediaRecorder?.stop()
-      this.riconoscimento?.stop()
+      this.riconoscimento?.abort()
     } catch {
       /* nulla da fare */
     }
@@ -165,6 +277,10 @@ export class RegistratoreVocale {
     const candidati = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']
     return candidati.find((c) => MediaRecorder.isTypeSupported?.(c))
   }
+}
+
+function attendi(millisecondi: number): Promise<void> {
+  return new Promise((risolvi) => setTimeout(risolvi, millisecondi))
 }
 
 /**

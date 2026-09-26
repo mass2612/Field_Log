@@ -274,7 +274,7 @@ export default function NuovoIntervento({ azienda }: { azienda: Azienda }) {
                   allegatoId: allegatoId!,
                   durataSec: nota.durataSec,
                   trascrizioneLocale: nota.trascrizione,
-                  statoTrascrizione: nota.inCodaServer ? 'in_coda_server' : 'locale',
+                  statoTrascrizione: nota.trascrizione ? 'locale' : 'in_coda_server',
                 }
               : undefined,
             settaggi: Object.keys(settaggi).length > 0 ? settaggi : undefined,

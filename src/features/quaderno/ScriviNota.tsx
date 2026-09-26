@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import type { Azienda, Tracciato } from '../../core/domain/types'
+import type { Allegato, Azienda, Tracciato } from '../../core/domain/types'
 import type { Nota } from '../../core/domain/note'
 import { ARGOMENTI, leggiNota, proponiArgomenti } from '../../core/domain/note'
 import { db, modificaTracciata, oggi, traccia } from '../../core/db/db'
 import { nomiDeiCampi } from '../../core/db/note'
-import BottoneVocale from '../../ui/BottoneVocale'
+import BottoneVocale, { type NotaVocaleRegistrata } from '../../ui/BottoneVocale'
+import { spiegaMotivo, type MotivoMancataTrascrizione } from '../../core/voce/registrazione'
 import { fmtData } from '../../core/i18n'
 
 /**
@@ -51,6 +52,20 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
   const [caricata, setCaricata] = useState(false)
   const [daRileggere, setDaRileggere] = useState(false)
   const [salvato, setSalvato] = useState(false)
+  const [audio, setAudio] = useState<NotaVocaleRegistrata | null>(null)
+  const [motivoVocale, setMotivoVocale] = useState<MotivoMancataTrascrizione | null>(null)
+
+  // L'indirizzo temporaneo per riascoltare, liberato quando non serve più.
+  const [urlAudio, setUrlAudio] = useState<string | null>(null)
+  useEffect(() => {
+    if (!audio) {
+      setUrlAudio(null)
+      return
+    }
+    const url = URL.createObjectURL(audio.blob)
+    setUrlAudio(url)
+    return () => URL.revokeObjectURL(url)
+  }, [audio])
 
   // In modifica il modulo si riempie una volta sola.
   useEffect(() => {
@@ -99,6 +114,23 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
         )?.id
       : undefined
 
+    /*
+     * L'audio si archivia solo quando la trascrizione non è riuscita: è lì che
+     * serve, perché senza si perderebbe quello che è stato detto.
+     */
+    let audioAllegatoId: string | undefined
+    if (audio) {
+      const allegato = traccia<Omit<Allegato, keyof Tracciato>>({
+        aziendaId: azienda.id,
+        nomeFile: `nota-${dataFatto}.webm`,
+        tipoMime: audio.tipoMime,
+        dimensioneByte: audio.blob.size,
+        blob: audio.blob,
+      }) as Allegato
+      await db.allegati.add(allegato)
+      audioAllegatoId = allegato.id
+    }
+
     const dati = {
       aziendaId: azienda.id,
       testo: testo.trim(),
@@ -110,6 +142,8 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
       scheda: letta
         ? { ...letta.scheda, campoNome: campo, confermata: esistente?.scheda?.confermata }
         : undefined,
+      daVoce: audio != null || daRileggere || undefined,
+      audioAllegatoId,
       trascrizioneDaRileggere: daRileggere || undefined,
     }
 
@@ -170,19 +204,51 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
         nomiProdotti={contesto?.prodottiConosciuti ?? []}
         onRegistrata={(nota) => {
           if (nota.trascrizione) {
+            /*
+             * Trascrizione riuscita: l'audio si può buttare. Sono pochi byte
+             * risparmiati per nota, ma su tre note al giorno per dieci anni la
+             * differenza si vede.
+             */
             aggiungiTesto(nota.trascrizione)
+            setAudio(null)
+            setMotivoVocale(null)
             setDaRileggere(true)
           } else {
-            aggiungiTesto('[vocale non trascritto: manca la rete]')
-            setDaRileggere(true)
+            /*
+             * Trascrizione fallita: **l'audio si tiene.** È l'unico caso in cui
+             * buttarlo farebbe perdere la nota per davvero.
+             */
+            setAudio(nota)
+            setMotivoVocale(nota.motivo ?? 'sconosciuto')
           }
         }}
       />
 
-      {daRileggere && (
+      {daRileggere && !audio && (
         <p className="aiuto">
           ✏️ Rileggi quello che ha scritto: sui nomi commerciali sbaglia spesso.
         </p>
+      )}
+
+      {/* Niente più "manca la rete" sparato a caso: si dice cosa è successo. */}
+      {audio && motivoVocale && (
+        <div className="scheda">
+          <strong>🎙️ Registrato {audio.durataSec}s, ma senza trascrizione</strong>
+          <p className="aiuto" style={{ marginTop: 6 }}>
+            {spiegaMotivo(motivoVocale)}
+          </p>
+
+          <audio controls src={urlAudio ?? undefined} style={{ width: '100%', marginTop: 10 }} />
+
+          <p className="aiuto">
+            L’audio resta salvato insieme alla nota: riascoltalo e scrivi tu quello che hai detto.
+            Niente è andato perso.
+          </p>
+
+          <button type="button" className="link-testo" onClick={() => setAudio(null)}>
+            Butta la registrazione
+          </button>
+        </div>
       )}
 
       <div className="pila" style={{ marginTop: 18 }}>
