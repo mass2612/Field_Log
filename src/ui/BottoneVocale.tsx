@@ -1,55 +1,49 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  RegistratoreVocale,
+  RegistratoreAudio,
+  Trascrittore,
+  comeVaQui,
   correggiConMagazzino,
-  spiegaMotivo,
-  type EsitoRegistrazione,
+  motivoRicordato,
+  ricordaEsito,
+  type EsitoVoce,
   type MotivoMancataTrascrizione,
 } from '../core/voce/registrazione'
-
-export interface NotaVocaleRegistrata {
-  blob: Blob
-  tipoMime: string
-  durataSec: number
-  trascrizione?: string
-  /** Se la trascrizione manca, **perché** manca. Mai tirare a indovinare. */
-  motivo?: MotivoMancataTrascrizione
-}
 
 type Modo = 'fermo' | 'tenuto' | 'bloccato'
 
 /**
- * Il pulsante per parlare.
+ * Il microfono.
  *
- * Due gesti, come nelle applicazioni di messaggi che tutti conoscono:
+ * Volutamente **piccolo**: è un modo di scrivere, non un'azione importante come
+ * salvare. Prima era un riquadro grande quanto il pulsante Salva e appiccicato
+ * al testo: il pollice ci finiva sopra per sbaglio, e la schermata sembrava
+ * avere due comandi principali. Sulla schermata di scrittura il pulsante grande
+ * dev'essere uno solo, e deve essere Salva.
+ *
+ * Due gesti, come nelle applicazioni di messaggi:
  *   - **tieni premuto e parla**, si ferma quando molli;
- *   - **un tocco secco** e la registrazione resta accesa finché non ritocchi.
- *
- * Il secondo non è un vezzo: tenere premuto per un minuto, con i guanti e la
- * mano che trema, non è una cosa che si chiede a un uomo di settant'anni.
- *
- * Dettaglio che sembrava un dettaglio e non lo era: il dito va **agganciato**
- * al pulsante. Prima bastava spostarlo di un millimetro per far uscire il
- * puntatore dal bottone e fermare tutto dopo mezzo secondo — sul telefono
- * succedeva quasi sempre, e la nota usciva vuota.
+ *   - **un tocco secco** e resta acceso finché non tocchi di nuovo.
  */
 export default function BottoneVocale({
   nomiProdotti = [],
-  onRegistrata,
+  onEsito,
 }: {
   nomiProdotti?: string[]
-  onRegistrata: (nota: NotaVocaleRegistrata) => void
+  onEsito: (esito: EsitoVoce) => void
 }) {
-  const registratore = useRef<RegistratoreVocale | null>(null)
+  const trascrittore = useRef<Trascrittore | null>(null)
+  const registratore = useRef<RegistratoreAudio | null>(null)
+  const motivoRipiego = useRef<MotivoMancataTrascrizione>('sconosciuto')
   const premutoIl = useRef(0)
+
   const [modo, setModo] = useState<Modo>('fermo')
   const [secondi, setSecondi] = useState(0)
   const [errore, setErrore] = useState<string | null>(null)
 
   const inCorso = modo !== 'fermo'
+  const soloAudio = comeVaQui() === 'non_funziona'
 
-  // Il cronometro serve a far vedere che sta davvero registrando: senza, non si
-  // capisce se il pulsante ha preso o no.
   useEffect(() => {
     if (!inCorso) return
     setSecondi(0)
@@ -57,41 +51,75 @@ export default function BottoneVocale({
     return () => clearInterval(orologio)
   }, [inCorso])
 
-  async function avvia() {
-    setErrore(null)
+  /** Registra l'audio e basta: si usa quando trascrivere non è possibile. */
+  async function avviaSoloAudio(motivo: MotivoMancataTrascrizione) {
+    motivoRipiego.current = motivo
+    registratore.current = new RegistratoreAudio()
     try {
-      registratore.current = new RegistratoreVocale('it-IT')
       await registratore.current.avvia()
-      if ('vibrate' in navigator) navigator.vibrate(40)
-      return true
     } catch {
-      setErrore(
-        'Non riesco ad accedere al microfono. Controlla di aver dato il permesso a questo sito.',
-      )
       registratore.current = null
+      setErrore('Non riesco ad accedere al microfono. Controlla il permesso per questo sito.')
       setModo('fermo')
-      return false
     }
   }
 
+  async function avvia() {
+    setErrore(null)
+
+    // Se su questo telefono la trascrizione ha già fallito, non si finge:
+    // si registra l'audio direttamente.
+    if (soloAudio) {
+      await avviaSoloAudio(motivoRicordato())
+      return
+    }
+
+    const nuovo = new Trascrittore('it-IT')
+    if (nuovo.avvia()) {
+      trascrittore.current = nuovo
+      if ('vibrate' in navigator) navigator.vibrate(40)
+      return
+    }
+
+    // Il browser non sa trascrivere: si ripiega sull'audio.
+    await avviaSoloAudio('non_supportato')
+  }
+
   async function ferma() {
-    const corrente = registratore.current
+    const t = trascrittore.current
+    const r = registratore.current
+    trascrittore.current = null
     registratore.current = null
     setModo('fermo')
-    if (!corrente) return
 
     try {
-      const esito: EsitoRegistrazione = await corrente.ferma()
-      const grezza = esito.trascrizioneImmediata
-      const trascrizione = grezza ? correggiConMagazzino(grezza, nomiProdotti) : undefined
+      let esito: EsitoVoce | null = null
+      if (t) esito = await t.ferma()
+      else if (r) esito = await r.ferma(motivoRipiego.current)
+      if (!esito) return
 
-      onRegistrata({
-        blob: esito.blob,
-        tipoMime: esito.tipoMime,
-        durataSec: esito.durataSec,
-        trascrizione,
-        motivo: esito.motivo,
-      })
+      if (esito.tipo === 'testo') {
+        ricordaEsito('funziona')
+        onEsito({
+          ...esito,
+          testo: correggiConMagazzino(esito.testo, nomiProdotti),
+        })
+      } else {
+        /*
+         * Si ricorda solo quello che dipende dal telefono. "Non ho sentito
+         * parlare" è colpa del gesto, non dell'apparecchio: smettere di
+         * trascrivere per quello sarebbe una resa ingiusta.
+         */
+        const colpaDelTelefono: MotivoMancataTrascrizione[] = [
+          'non_supportato',
+          'servizio_irraggiungibile',
+          'permesso_negato',
+          'microfono_occupato',
+        ]
+        if (colpaDelTelefono.includes(esito.motivo)) ricordaEsito('non_funziona', esito.motivo)
+        onEsito(esito)
+      }
+
       if ('vibrate' in navigator) navigator.vibrate([30, 60, 30])
     } catch {
       setErrore('Registrazione non riuscita.')
@@ -100,15 +128,13 @@ export default function BottoneVocale({
 
   function premuto(e: React.PointerEvent<HTMLButtonElement>) {
     e.preventDefault()
-
     if (modo === 'bloccato') {
       void ferma()
       return
     }
     if (modo === 'tenuto') return
 
-    // Si aggancia il dito al pulsante: da qui in poi gli eventi arrivano qui
-    // anche se la mano si sposta.
+    // Il dito resta agganciato al pulsante anche se la mano si sposta.
     try {
       e.currentTarget.setPointerCapture(e.pointerId)
     } catch {
@@ -123,8 +149,6 @@ export default function BottoneVocale({
   function rilasciato(e: React.PointerEvent<HTMLButtonElement>) {
     e.preventDefault()
     if (modo !== 'tenuto') return
-
-    // Tocco secco: resta acceso. Pressione lunga: si ferma al rilascio.
     if (Date.now() - premutoIl.current < 500) setModo('bloccato')
     else void ferma()
   }
@@ -133,25 +157,25 @@ export default function BottoneVocale({
     <>
       <button
         type="button"
-        className={`bottone-voce ${inCorso ? 'registra' : ''}`}
+        className={`microfono ${inCorso ? 'registra' : ''}`}
         onPointerDown={premuto}
         onPointerUp={rilasciato}
         onPointerCancel={() => {
           if (modo === 'tenuto') void ferma()
         }}
         onContextMenu={(e) => e.preventDefault()}
+        aria-label={inCorso ? 'Sto registrando, tocca per finire' : 'Detta la nota'}
+        title={
+          soloAudio
+            ? 'Su questo telefono la trascrizione non funziona: registro l’audio'
+            : 'Tieni premuto e parla, oppure un tocco secco'
+        }
       >
-        <span style={{ fontSize: 30 }} aria-hidden>
+        <span aria-hidden style={{ fontSize: 26 }}>
           {inCorso ? '⏺' : '🎙️'}
         </span>
-        {modo === 'fermo' && 'Tieni premuto e parla'}
-        {modo === 'tenuto' && `Sto registrando… ${secondi}s`}
-        {modo === 'bloccato' && `Sto registrando… ${secondi}s — tocca per finire`}
+        {inCorso && <span className="microfono-tempo">{secondi}s</span>}
       </button>
-
-      {modo === 'fermo' && (
-        <p className="aiuto">Oppure un tocco secco: registra finché non tocchi di nuovo.</p>
-      )}
 
       {errore && (
         <p className="aiuto" style={{ color: 'var(--rosso)' }}>
@@ -161,5 +185,3 @@ export default function BottoneVocale({
     </>
   )
 }
-
-export { spiegaMotivo }

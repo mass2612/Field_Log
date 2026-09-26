@@ -918,3 +918,75 @@ textarea {
   max-height: 260px;
   overflow: auto;
 }
+
+/* ------------------------------------------------- scrivere con la voce */
+
+/*
+ * Il microfono sta dentro il riquadro del testo, in un angolo.
+ *
+ * Prima era un riquadro grande quanto Salva e appiccicato al testo: il pollice
+ * ci finiva sopra per sbaglio e la schermata sembrava avere due comandi
+ * principali. Su una schermata di scrittura il pulsante grande è uno solo, e
+ * dev'essere Salva.
+ */
+.riquadro-nota {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.riquadro-nota .campo-nota {
+  margin-bottom: 0;
+  /* Spazio in basso a destra, così il testo non finisce sotto al microfono. */
+  padding-bottom: 76px;
+}
+
+.angolo-microfono {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+.microfono {
+  width: 60px;
+  height: 60px;
+  min-height: 60px;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--verde-tenue);
+  border: 2px solid var(--verde);
+  color: var(--verde);
+  flex-direction: column;
+  gap: 0;
+  box-shadow: var(--ombra);
+  touch-action: none;
+  user-select: none;
+}
+
+.microfono:active {
+  background: var(--verde);
+  color: #fff;
+}
+
+/* In registrazione si allarga e si fa rosso: non ci si può sbagliare. */
+.microfono.registra {
+  background: var(--rosso);
+  border-color: var(--rosso);
+  color: #fff;
+  width: auto;
+  min-width: 60px;
+  padding: 0 16px;
+  animation: pulsa 1.2s ease-in-out infinite;
+}
+
+.microfono-tempo {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .microfono.registra {
+    animation: none;
+  }
+}

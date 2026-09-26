@@ -24,7 +24,7 @@ import {
 import { calcolaRaccoltaConsentitaDal, calcolaRientroConsentitoDal } from '../../core/rules/carenza'
 import { controllaIntervento, type Rilievo } from '../../core/rules/controlli'
 import { leggiPosizione, suggerisciCampi } from '../../core/rules/posizione'
-import BottoneVocale, { type NotaVocaleRegistrata } from '../../ui/BottoneVocale'
+import BottoneVocale from '../../ui/BottoneVocale'
 import CalcolatoreMiscela from './CalcolatoreMiscela'
 import RigheProdotto from './RigheProdotto'
 import SettaggiMacchina from './Settaggi'
@@ -60,7 +60,14 @@ export default function NuovoIntervento({ azienda }: { azienda: Azienda }) {
   const [superficie, setSuperficie] = useState('')
   const [volumeAcqua, setVolumeAcqua] = useState('')
   const [note, setNote] = useState('')
-  const [nota, setNota] = useState<NotaVocaleRegistrata | null>(null)
+  // Schermata vecchia, fuori dal flusso principale: si tiene solo quello che
+  // serve a non perdere la nota vocale.
+  const [nota, setNota] = useState<{
+    blob?: Blob
+    tipoMime?: string
+    durataSec: number
+    trascrizione?: string
+  } | null>(null)
   const [settaggi, setSettaggi] = useState<Settaggi>({})
   const [raccolta, setRaccolta] = useState<DatiRaccolta>({})
   const [posizione, setPosizione] = useState<Coordinate | null>(null)
@@ -240,11 +247,13 @@ export default function NuovoIntervento({ azienda }: { azienda: Azienda }) {
         async () => {
           let allegatoId: ID | undefined
 
-          if (nota) {
+          // L'audio esiste solo quando la trascrizione non è riuscita:
+          // se il testo c'è, non c'è niente da archiviare.
+          if (nota?.blob) {
             const allegato = traccia<Omit<Allegato, keyof Tracciato>>({
               aziendaId: azienda.id,
               nomeFile: `nota-${data}.webm`,
-              tipoMime: nota.tipoMime,
+              tipoMime: nota.tipoMime ?? 'audio/webm',
               dimensioneByte: nota.blob.size,
               blob: nota.blob,
               posizione: posizione ?? undefined,
@@ -527,7 +536,18 @@ export default function NuovoIntervento({ azienda }: { azienda: Azienda }) {
       )}
 
       <h2 className="titolo-sezione">{t('intervento.note')}</h2>
-      <BottoneVocale nomiProdotti={nomiProdotti} onRegistrata={setNota} />
+      <BottoneVocale
+        nomiProdotti={nomiProdotti}
+        onEsito={(esito) =>
+          setNota(
+            esito.tipo === 'testo'
+              ? { durataSec: esito.durataSec, trascrizione: esito.testo }
+              : esito.tipo === 'audio'
+                ? { durataSec: esito.durataSec, blob: esito.blob, tipoMime: esito.tipoMime }
+                : { durataSec: esito.durataSec },
+          )
+        }
+      />
 
       {nota && (
         <div className="scheda" style={{ marginTop: 12 }}>

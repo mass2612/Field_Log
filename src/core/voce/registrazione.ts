@@ -1,22 +1,24 @@
 /**
  * Note vocali.
  *
- * Regola non negoziabile: **l'audio si salva sempre e comunque**. La trascrizione
- * è un comodo di lettura, l'audio è la prova. Se la trascrizione sbaglia il nome
- * di un prodotto, il registro sarebbe falso: l'audio permette sempre di rimediare.
+ * ## Il difetto da cui nasce questo file
  *
- * Avvertenza tecnica: la Web Speech API di Chrome *non* è locale, manda l'audio
- * ai server di Google e senza rete non funziona. Per una vera trascrizione
- * offline servirà un modello incorporato nell'app (Whisper compilato in WASM o
- * simili): è previsto, non è ancora qui.
+ * La prima versione avviava **insieme** il registratore audio e il
+ * riconoscimento vocale. Sul telefono non funziona: i due si contendono il
+ * microfono, il registratore lo prende per primo e la trascrizione resta a
+ * bocca asciutta. Risultato: registrava e non trascriveva mai.
  *
- * Seconda avvertenza, imparata sbagliando: quando la trascrizione non riesce,
- * **il motivo va detto per quello che è.** La prima versione scriveva sempre
- * "manca la rete", anche quando la rete c'era e il problema era un altro. Un
- * messaggio che indovina la causa fa perdere ore a chi lo legge.
+ * Da qui la regola: **uno alla volta.**
+ *
+ *   1. si prova a **trascrivere** — il microfono lo prende il riconoscimento,
+ *      e nessun altro. È la strada normale, e non lascia audio da conservare:
+ *      poche decine di byte invece di qualche centinaio di migliaia.
+ *   2. se il riconoscimento non c'è o fallisce, si **registra l'audio** e basta,
+ *      così almeno quello che è stato detto non si perde.
+ *
+ * L'app si ricorda com'è andata su questo telefono: se la trascrizione non
+ * funziona, smette di riprovare a ogni nota e lo dice, invece di far finta.
  */
-
-export type StatoRegistrazione = 'ferma' | 'in_corso' | 'elaborazione'
 
 /** Perché la trascrizione non c'è. Mai tirare a indovinare. */
 export type MotivoMancataTrascrizione =
@@ -34,31 +36,86 @@ export function spiegaMotivo(motivo: MotivoMancataTrascrizione): string {
     case 'non_supportato':
       return 'Questo browser non sa trascrivere. Su Android funziona con Chrome.'
     case 'senza_rete':
-      return 'Il telefono risulta senza rete: la trascrizione ha bisogno della linea.'
+      return 'Il telefono è senza rete: la trascrizione ha bisogno della linea.'
     case 'servizio_irraggiungibile':
-      return 'La rete c’è, ma il servizio di trascrizione non ha risposto. Riprova fra poco.'
+      return 'La rete c’è, ma il servizio di trascrizione non ha risposto.'
     case 'permesso_negato':
-      return 'Manca il permesso per il microfono. Vai nelle impostazioni del sito e concedilo.'
+      return 'Manca il permesso per il microfono: vai nelle impostazioni del sito e concedilo.'
     case 'microfono_occupato':
       return 'Il microfono era occupato da un’altra applicazione.'
     case 'nessun_parlato':
-      return 'Non ho sentito parlare: forse il pulsante si è rilasciato troppo presto.'
+      return 'Non ho sentito parlare.'
     case 'troppo_breve':
-      return 'Registrazione troppo breve. Tieni premuto finché hai finito di parlare.'
+      return 'Troppo breve: tieni premuto finché hai finito di parlare.'
     case 'sconosciuto':
       return 'Trascrizione non riuscita, e non sono riuscito a capire perché.'
   }
 }
 
-export interface EsitoRegistrazione {
-  blob: Blob
-  durataSec: number
-  tipoMime: string
-  /** Presente solo se il riconoscimento vocale ha funzionato. */
-  trascrizioneImmediata?: string
-  /** Presente quando la trascrizione manca: dice **perché**. */
-  motivo?: MotivoMancataTrascrizione
+/** Com'è finita una registrazione. */
+export type EsitoVoce =
+  | { tipo: 'testo'; testo: string; durataSec: number }
+  | {
+      tipo: 'audio'
+      blob: Blob
+      tipoMime: string
+      durataSec: number
+      motivo: MotivoMancataTrascrizione
+    }
+  | { tipo: 'niente'; motivo: MotivoMancataTrascrizione; durataSec: number }
+
+// ---------------------------------------------------------------------------
+// Memoria di come va su questo telefono
+// ---------------------------------------------------------------------------
+
+const CHIAVE_MEMORIA = 'trascrizione-funziona'
+
+export type EsperienzaTrascrizione = 'da_provare' | 'funziona' | 'non_funziona'
+
+export function comeVaQui(): EsperienzaTrascrizione {
+  try {
+    return (localStorage.getItem(CHIAVE_MEMORIA) as EsperienzaTrascrizione) ?? 'da_provare'
+  } catch {
+    return 'da_provare'
+  }
 }
+
+const CHIAVE_MOTIVO = 'trascrizione-motivo'
+
+export function ricordaEsito(esito: EsperienzaTrascrizione, motivo?: MotivoMancataTrascrizione): void {
+  try {
+    localStorage.setItem(CHIAVE_MEMORIA, esito)
+    // Si ricorda **anche il perché**: altrimenti alla registrazione successiva
+    // l'app raccontava un motivo a caso ("questo browser non sa trascrivere")
+    // anche quando il problema era un altro.
+    if (motivo) localStorage.setItem(CHIAVE_MOTIVO, motivo)
+    else localStorage.removeItem(CHIAVE_MOTIVO)
+  } catch {
+    /* se il telefono non vuole ricordare, pazienza: si riprova ogni volta */
+  }
+}
+
+export function motivoRicordato(): MotivoMancataTrascrizione {
+  try {
+    return (localStorage.getItem(CHIAVE_MOTIVO) as MotivoMancataTrascrizione) ?? 'sconosciuto'
+  } catch {
+    return 'sconosciuto'
+  }
+}
+
+/** Fa dimenticare: si riprova a trascrivere alla prossima nota. */
+export function riprovaTrascrizione(): void {
+  try {
+    localStorage.removeItem(CHIAVE_MEMORIA)
+    localStorage.removeItem(CHIAVE_MOTIVO)
+  } catch {
+    /* nulla da fare */
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Riconoscimento vocale
+// ---------------------------------------------------------------------------
 
 interface RisultatoRiconoscimento {
   isFinal: boolean
@@ -70,7 +127,7 @@ interface EventoRisultato {
   results: ArrayLike<RisultatoRiconoscimento>
 }
 
-interface RiconoscimentoVocale extends EventTarget {
+interface RiconoscimentoVocale {
   lang: string
   continuous: boolean
   interimResults: boolean
@@ -94,21 +151,17 @@ function creaRiconoscimento(lingua: string): RiconoscimentoVocale | null {
   const r = new Costruttore()
   r.lang = lingua
   r.continuous = true
-  /*
-   * I risultati provvisori servono davvero: su una frase corta il risultato
-   * definitivo spesso non fa in tempo ad arrivare prima che si rilasci il
-   * pulsante. Meglio un testo provvisorio da rileggere che niente.
-   */
+  // I risultati provvisori salvano le frasi corte: il definitivo spesso non fa
+  // in tempo ad arrivare prima che si rilasci il pulsante.
   r.interimResults = true
   r.maxAlternatives = 1
   return r
 }
 
-export function trascrizioneImmediataDisponibile(): boolean {
-  return creaRiconoscimento('it-IT') !== null && navigator.onLine
+export function trascrizioneDisponibile(): boolean {
+  return creaRiconoscimento('it-IT') !== null
 }
 
-/** Codici della Web Speech API tradotti in cause comprensibili. */
 function motivoDaCodice(codice?: string): MotivoMancataTrascrizione {
   switch (codice) {
     case 'network':
@@ -125,69 +178,38 @@ function motivoDaCodice(codice?: string): MotivoMancataTrascrizione {
   }
 }
 
-export class RegistratoreVocale {
-  private mediaRecorder: MediaRecorder | null = null
-  private pezzi: Blob[] = []
+/**
+ * Trascrive mentre si parla. **Non tocca il microfono con nient'altro**: è
+ * tutto il punto.
+ */
+export class Trascrittore {
   private riconoscimento: RiconoscimentoVocale | null = null
   private testoFinale = ''
   private testoProvvisorio = ''
   private motivo: MotivoMancataTrascrizione | undefined
-  private fineRiconoscimento: Promise<void> = Promise.resolve()
+  private fine: Promise<void> = Promise.resolve()
   private iniziatoIl = 0
-  private flusso: MediaStream | null = null
-
-  stato: StatoRegistrazione = 'ferma'
+  private chiudi: () => void = () => {}
 
   constructor(private lingua = 'it-IT') {}
 
-  async avvia(): Promise<void> {
-    if (this.stato !== 'ferma') return
+  /** Falso se il browser non sa trascrivere: allora si passa all'audio. */
+  avvia(): boolean {
+    this.riconoscimento = creaRiconoscimento(this.lingua)
+    if (!this.riconoscimento) {
+      this.motivo = 'non_supportato'
+      return false
+    }
 
-    this.flusso = await navigator.mediaDevices.getUserMedia({ audio: true })
-    this.pezzi = []
     this.testoFinale = ''
     this.testoProvvisorio = ''
     this.motivo = undefined
     this.iniziatoIl = Date.now()
-
-    const tipoMime = this.scegliTipoMime()
-    this.mediaRecorder = new MediaRecorder(
-      this.flusso,
-      tipoMime ? { mimeType: tipoMime } : undefined,
-    )
-    this.mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) this.pezzi.push(e.data)
-    }
-    this.mediaRecorder.start(500)
-
-    this.avviaRiconoscimento()
-    this.stato = 'in_corso'
-  }
-
-  private avviaRiconoscimento(): void {
-    this.riconoscimento = creaRiconoscimento(this.lingua)
-
-    if (!this.riconoscimento) {
-      this.motivo = 'non_supportato'
-      return
-    }
-    if (!navigator.onLine) {
-      this.motivo = 'senza_rete'
-      this.riconoscimento = null
-      return
-    }
-
-    // Si tiene una promessa che si chiude quando il riconoscimento ha finito:
-    // i risultati arrivano dopo lo `stop()`, e leggere il testo subito
-    // significava leggerlo sempre vuoto. Era il difetto principale.
-    let chiudi: () => void = () => {}
-    this.fineRiconoscimento = new Promise<void>((risolvi) => {
-      chiudi = risolvi
+    this.fine = new Promise<void>((risolvi) => {
+      this.chiudi = risolvi
     })
 
     this.riconoscimento.onresult = (e) => {
-      // Si riparte da `resultIndex`, non da zero: altrimenti a ogni evento si
-      // riscrivevano anche i pezzi già presi, e il testo usciva triplicato.
       let provvisorio = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const risultato = e.results[i]
@@ -197,86 +219,118 @@ export class RegistratoreVocale {
       }
       this.testoProvvisorio = provvisorio
     }
-
     this.riconoscimento.onerror = (e) => {
       this.motivo = motivoDaCodice(e?.error)
-      chiudi()
+      this.chiudi()
     }
-
-    this.riconoscimento.onend = () => chiudi()
+    this.riconoscimento.onend = () => this.chiudi()
 
     try {
       this.riconoscimento.start()
+      return true
     } catch {
       this.motivo = 'sconosciuto'
       this.riconoscimento = null
-      chiudi()
+      this.chiudi()
+      return false
     }
   }
 
-  async ferma(): Promise<EsitoRegistrazione> {
-    if (this.stato !== 'in_corso' || !this.mediaRecorder) {
-      throw new Error('Nessuna registrazione in corso')
+  async ferma(): Promise<EsitoVoce> {
+    try {
+      this.riconoscimento?.stop()
+    } catch {
+      /* può essere già chiuso */
     }
-    this.stato = 'elaborazione'
 
+    // I risultati arrivano **dopo** lo stop: si aspetta, ma non all'infinito.
+    await Promise.race([this.fine, attendi(2500)])
+
+    const durataSec = Math.round((Date.now() - this.iniziatoIl) / 1000)
+    const testo = (this.testoFinale + ' ' + this.testoProvvisorio).trim()
+
+    if (testo) return { tipo: 'testo', testo, durataSec }
+
+    const motivo = this.motivo ?? (durataSec < 1 ? 'troppo_breve' : 'nessun_parlato')
+    return { tipo: 'niente', motivo, durataSec }
+  }
+
+  annulla(): void {
+    try {
+      this.riconoscimento?.abort()
+    } catch {
+      /* nulla da fare */
+    }
+    this.chiudi()
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Registrazione dell'audio, quando la trascrizione non è possibile
+// ---------------------------------------------------------------------------
+
+export class RegistratoreAudio {
+  private mediaRecorder: MediaRecorder | null = null
+  private pezzi: Blob[] = []
+  private flusso: MediaStream | null = null
+  private iniziatoIl = 0
+
+  async avvia(): Promise<void> {
+    this.flusso = await navigator.mediaDevices.getUserMedia({ audio: true })
+    this.pezzi = []
+    this.iniziatoIl = Date.now()
+
+    const tipoMime = scegliTipoMime()
+    this.mediaRecorder = new MediaRecorder(
+      this.flusso,
+      tipoMime ? { mimeType: tipoMime } : undefined,
+    )
+    this.mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) this.pezzi.push(e.data)
+    }
+    this.mediaRecorder.start(500)
+  }
+
+  async ferma(motivo: MotivoMancataTrascrizione): Promise<EsitoVoce> {
     const registratore = this.mediaRecorder
-    const tipoMime = registratore.mimeType || 'audio/webm'
+    if (!registratore) return { tipo: 'niente', motivo, durataSec: 0 }
 
+    const tipoMime = registratore.mimeType || 'audio/webm'
     const blob = await new Promise<Blob>((risolvi) => {
       registratore.onstop = () => risolvi(new Blob(this.pezzi, { type: tipoMime }))
       registratore.stop()
     })
 
-    // Si chiede al riconoscimento di concludere e **lo si aspetta**, ma non
-    // all'infinito: se entro due secondi non ha finito si prende quello che c'è.
-    try {
-      this.riconoscimento?.stop()
-    } catch {
-      /* può essere già chiuso: non è un problema */
-    }
-    await Promise.race([this.fineRiconoscimento, attendi(2000)])
-
-    this.flusso?.getTracks().forEach((t) => t.stop())
-    this.flusso = null
-    this.mediaRecorder = null
-    this.stato = 'ferma'
-
-    const durataSec = Math.round((Date.now() - this.iniziatoIl) / 1000)
-    const trascrizione = (this.testoFinale + ' ' + this.testoProvvisorio).trim()
-
-    let motivo = this.motivo
-    if (!trascrizione && !motivo) {
-      motivo = durataSec < 1 ? 'troppo_breve' : 'nessun_parlato'
-    }
-
+    this.liberaMicrofono()
     return {
+      tipo: 'audio',
       blob,
-      durataSec,
       tipoMime,
-      trascrizioneImmediata: trascrizione.length > 0 ? trascrizione : undefined,
-      motivo: trascrizione.length > 0 ? undefined : motivo,
+      durataSec: Math.round((Date.now() - this.iniziatoIl) / 1000),
+      motivo,
     }
   }
 
   annulla(): void {
     try {
       this.mediaRecorder?.stop()
-      this.riconoscimento?.abort()
     } catch {
       /* nulla da fare */
     }
+    this.liberaMicrofono()
+    this.pezzi = []
+  }
+
+  private liberaMicrofono(): void {
     this.flusso?.getTracks().forEach((t) => t.stop())
     this.flusso = null
     this.mediaRecorder = null
-    this.pezzi = []
-    this.stato = 'ferma'
   }
+}
 
-  private scegliTipoMime(): string | undefined {
-    const candidati = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']
-    return candidati.find((c) => MediaRecorder.isTypeSupported?.(c))
-  }
+function scegliTipoMime(): string | undefined {
+  const candidati = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']
+  return candidati.find((c) => MediaRecorder.isTypeSupported?.(c))
 }
 
 function attendi(millisecondi: number): Promise<void> {

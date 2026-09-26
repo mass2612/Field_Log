@@ -37,10 +37,17 @@ export interface Nota extends Tracciato {
   /** Arrivata a voce. */
   daVoce?: boolean
   /**
-   * Audio conservato **solo finché la trascrizione non è stata riletta**.
-   * Poi si cancella da solo: pochi byte, e nessuna nota persa per strada.
+   * Registrazioni allegate.
+   *
+   * Ce ne può essere più d'una: chi detta spesso riprova due o tre volte, e
+   * buttare la precedente a ogni tentativo — come faceva la prima versione —
+   * significa perdere quello che aveva appena detto.
+   *
+   * Ci finiscono **solo le registrazioni che non si è riusciti a trascrivere**.
+   * Quando la trascrizione riesce resta il testo e l'audio si butta: sono
+   * poche decine di byte invece di qualche centinaio di migliaia.
    */
-  audioAllegatoId?: ID
+  audioAllegatiId?: ID[]
   trascrizioneDaRileggere?: boolean
 
   /** L'interpretazione strutturata, da confermare. */

@@ -6,8 +6,13 @@ import type { Nota } from '../../core/domain/note'
 import { ARGOMENTI, leggiNota, proponiArgomenti } from '../../core/domain/note'
 import { db, modificaTracciata, oggi, traccia } from '../../core/db/db'
 import { nomiDeiCampi } from '../../core/db/note'
-import BottoneVocale, { type NotaVocaleRegistrata } from '../../ui/BottoneVocale'
-import { spiegaMotivo, type MotivoMancataTrascrizione } from '../../core/voce/registrazione'
+import BottoneVocale from '../../ui/BottoneVocale'
+import {
+  comeVaQui,
+  riprovaTrascrizione,
+  spiegaMotivo,
+  type MotivoMancataTrascrizione,
+} from '../../core/voce/registrazione'
 import { fmtData } from '../../core/i18n'
 
 /**
@@ -52,20 +57,13 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
   const [caricata, setCaricata] = useState(false)
   const [daRileggere, setDaRileggere] = useState(false)
   const [salvato, setSalvato] = useState(false)
-  const [audio, setAudio] = useState<NotaVocaleRegistrata | null>(null)
-  const [motivoVocale, setMotivoVocale] = useState<MotivoMancataTrascrizione | null>(null)
-
-  // L'indirizzo temporaneo per riascoltare, liberato quando non serve più.
-  const [urlAudio, setUrlAudio] = useState<string | null>(null)
-  useEffect(() => {
-    if (!audio) {
-      setUrlAudio(null)
-      return
-    }
-    const url = URL.createObjectURL(audio.blob)
-    setUrlAudio(url)
-    return () => URL.revokeObjectURL(url)
-  }, [audio])
+  /*
+   * Le registrazioni non trascritte si **accumulano**: se uno detta tre volte
+   * perché non va, le prime due non devono sparire. La versione precedente
+   * teneva solo l'ultima e buttava le altre senza dire niente.
+   */
+  const [registrazioni, setRegistrazioni] = useState<RegistrazioneInAttesa[]>([])
+  const [avvisoVoce, setAvvisoVoce] = useState<MotivoMancataTrascrizione | null>(null)
 
   // In modifica il modulo si riempie una volta sola.
   useEffect(() => {
@@ -118,17 +116,17 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
      * L'audio si archivia solo quando la trascrizione non è riuscita: è lì che
      * serve, perché senza si perderebbe quello che è stato detto.
      */
-    let audioAllegatoId: string | undefined
-    if (audio) {
+    const audioAllegatiId: string[] = []
+    for (const [indice, registrazione] of registrazioni.entries()) {
       const allegato = traccia<Omit<Allegato, keyof Tracciato>>({
         aziendaId: azienda.id,
-        nomeFile: `nota-${dataFatto}.webm`,
-        tipoMime: audio.tipoMime,
-        dimensioneByte: audio.blob.size,
-        blob: audio.blob,
+        nomeFile: `nota-${dataFatto}-${indice + 1}.webm`,
+        tipoMime: registrazione.tipoMime,
+        dimensioneByte: registrazione.blob.size,
+        blob: registrazione.blob,
       }) as Allegato
       await db.allegati.add(allegato)
-      audioAllegatoId = allegato.id
+      audioAllegatiId.push(allegato.id)
     }
 
     const dati = {
@@ -142,8 +140,8 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
       scheda: letta
         ? { ...letta.scheda, campoNome: campo, confermata: esistente?.scheda?.confermata }
         : undefined,
-      daVoce: audio != null || daRileggere || undefined,
-      audioAllegatoId,
+      daVoce: registrazioni.length > 0 || daRileggere || undefined,
+      audioAllegatiId: audioAllegatiId.length > 0 ? audioAllegatiId : undefined,
       trascrizioneDaRileggere: daRileggere || undefined,
     }
 
@@ -190,67 +188,46 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
         </button>
       )}
 
-      {/* Cosa. Grande. È questa la nota. */}
-      <textarea
-        ref={areaTesto}
-        className="campo-nota"
-        value={testo}
-        onChange={(e) => setTesto(e.target.value)}
-        placeholder="Scrivi cosa hai fatto, oppure premi il microfono e raccontalo."
-        autoFocus={!inModifica}
-      />
+      {/*
+        Cosa. Grande. È questa la nota.
+        Il microfono sta **dentro** il riquadro, in un angolo: è un modo di
+        scrivere, non un comando che compete con Salva.
+      */}
+      <div className="riquadro-nota">
+        <textarea
+          ref={areaTesto}
+          className="campo-nota"
+          value={testo}
+          onChange={(e) => setTesto(e.target.value)}
+          placeholder="Scrivi cosa hai fatto, oppure tieni premuto il microfono e raccontalo."
+          autoFocus={!inModifica}
+        />
+        <div className="angolo-microfono">
+          <BottoneVocale
+            nomiProdotti={contesto?.prodottiConosciuti ?? []}
+            onEsito={(esito) => {
+              if (esito.tipo === 'testo') {
+                aggiungiTesto(esito.testo)
+                setDaRileggere(true)
+                setAvvisoVoce(null)
+              } else if (esito.tipo === 'audio') {
+                setRegistrazioni((precedenti) => [...precedenti, { ...esito, creataIl: Date.now() }])
+                setAvvisoVoce(esito.motivo)
+              } else {
+                setAvvisoVoce(esito.motivo)
+              }
+            }}
+          />
+        </div>
+      </div>
 
-      <BottoneVocale
-        nomiProdotti={contesto?.prodottiConosciuti ?? []}
-        onRegistrata={(nota) => {
-          if (nota.trascrizione) {
-            /*
-             * Trascrizione riuscita: l'audio si può buttare. Sono pochi byte
-             * risparmiati per nota, ma su tre note al giorno per dieci anni la
-             * differenza si vede.
-             */
-            aggiungiTesto(nota.trascrizione)
-            setAudio(null)
-            setMotivoVocale(null)
-            setDaRileggere(true)
-          } else {
-            /*
-             * Trascrizione fallita: **l'audio si tiene.** È l'unico caso in cui
-             * buttarlo farebbe perdere la nota per davvero.
-             */
-            setAudio(nota)
-            setMotivoVocale(nota.motivo ?? 'sconosciuto')
-          }
-        }}
-      />
-
-      {daRileggere && !audio && (
+      {daRileggere && (
         <p className="aiuto">
           ✏️ Rileggi quello che ha scritto: sui nomi commerciali sbaglia spesso.
         </p>
       )}
 
-      {/* Niente più "manca la rete" sparato a caso: si dice cosa è successo. */}
-      {audio && motivoVocale && (
-        <div className="scheda">
-          <strong>🎙️ Registrato {audio.durataSec}s, ma senza trascrizione</strong>
-          <p className="aiuto" style={{ marginTop: 6 }}>
-            {spiegaMotivo(motivoVocale)}
-          </p>
-
-          <audio controls src={urlAudio ?? undefined} style={{ width: '100%', marginTop: 10 }} />
-
-          <p className="aiuto">
-            L’audio resta salvato insieme alla nota: riascoltalo e scrivi tu quello che hai detto.
-            Niente è andato perso.
-          </p>
-
-          <button type="button" className="link-testo" onClick={() => setAudio(null)}>
-            Butta la registrazione
-          </button>
-        </div>
-      )}
-
+      {/* Un solo pulsante grande sulla schermata, ed è questo. */}
       <div className="pila" style={{ marginTop: 18 }}>
         <button
           className="pulsante-principale"
@@ -263,6 +240,56 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
           Lascia stare
         </button>
       </div>
+
+      {/* Niente più "manca la rete" sparato a caso: si dice cosa è successo. */}
+      {avvisoVoce && registrazioni.length === 0 && (
+        <div className="rilievo rilievo-avviso" style={{ marginTop: 16 }}>
+          <strong>🎙️ Non sono riuscito a trascrivere</strong>
+          <small>
+            {spiegaMotivo(avvisoVoce)}{' '}
+            {comeVaQui() === 'non_funziona'
+              ? 'Da adesso, su questo telefono, registro direttamente l’audio: premi di nuovo il microfono e parla.'
+              : 'Riprova.'}
+          </small>
+        </div>
+      )}
+
+      {/* Se l'app ha smesso di provarci, si deve poter tornare indietro. */}
+      {comeVaQui() === 'non_funziona' && (
+        <button
+          type="button"
+          className="link-testo"
+          onClick={() => {
+            riprovaTrascrizione()
+            setAvvisoVoce(null)
+          }}
+        >
+          Riprova a trascrivere invece di registrare
+        </button>
+      )}
+
+      {registrazioni.length > 0 && (
+        <>
+          <h2 className="titolo-sezione">
+            Registrazioni da riscrivere ({registrazioni.length})
+          </h2>
+          <p className="aiuto" style={{ marginTop: -4 }}>
+            {avvisoVoce ? spiegaMotivo(avvisoVoce) : ''} Riascolta e scrivi tu sopra: l’audio
+            resta allegato alla nota, non si perde niente.
+          </p>
+
+          {registrazioni.map((r, i) => (
+            <Registrazione
+              key={r.creataIl}
+              registrazione={r}
+              numero={i + 1}
+              onButta={() =>
+                setRegistrazioni((precedenti) => precedenti.filter((x) => x !== r))
+              }
+            />
+          ))}
+        </>
+      )}
 
       {/* Quello che l'app ha capito. Sotto, mai davanti. */}
       {testo.trim() && (
@@ -332,5 +359,48 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
         </>
       )}
     </>
+  )
+}
+
+/** Una registrazione che aspetta di essere riscritta a mano. */
+interface RegistrazioneInAttesa {
+  tipo: 'audio'
+  blob: Blob
+  tipoMime: string
+  durataSec: number
+  motivo: MotivoMancataTrascrizione
+  /** Serve solo come chiave stabile nell'elenco. */
+  creataIl: number
+}
+
+function Registrazione({
+  registrazione,
+  numero,
+  onButta,
+}: {
+  registrazione: RegistrazioneInAttesa
+  numero: number
+  onButta: () => void
+}) {
+  // L'indirizzo temporaneo per riascoltare, liberato quando non serve più.
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    const indirizzo = URL.createObjectURL(registrazione.blob)
+    setUrl(indirizzo)
+    return () => URL.revokeObjectURL(indirizzo)
+  }, [registrazione.blob])
+
+  return (
+    <div className="scheda">
+      <div className="nota-intestazione">
+        <strong>
+          🎙️ Registrazione {numero} — {registrazione.durataSec}s
+        </strong>
+        <button type="button" className="link-testo" onClick={onButta}>
+          butta
+        </button>
+      </div>
+      <audio controls src={url ?? undefined} style={{ width: '100%', marginTop: 10 }} />
+    </div>
   )
 }
