@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { leggiDocumento, type EsitoOcr, type GenereDocumento } from '../../core/ocr'
 import { oggi } from '../../core/db/db'
+import SceltaFoto from '../../ui/SceltaFoto'
 
 /**
  * Banco di prova della lettura automatica.
@@ -68,16 +69,8 @@ export default function BancoProva() {
       </div>
 
       <div className="gruppo-campo">
-        <label htmlFor="bp-foto">Foto</label>
-        <input
-          id="bp-foto"
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            if (f) prendi(f, f.name)
-          }}
-        />
+        <label>Foto</label>
+        <SceltaFoto disabilitato={inCorso} onFoto={(f) => prendi(f, f.name)} />
       </div>
 
       <button

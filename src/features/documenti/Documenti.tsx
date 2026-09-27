@@ -15,6 +15,7 @@ import {
   type EsitoOcr,
   type GenereDocumento,
 } from '../../core/ocr'
+import SceltaFoto from '../../ui/SceltaFoto'
 import { fmtData, fmtIstante } from '../../core/i18n'
 
 /**
@@ -278,17 +279,13 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
   return (
     <div className="scheda">
       <div className="gruppo-campo">
-        <label htmlFor="nd-foto">Foto del documento</label>
-        <input
-          id="nd-foto"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={(e) => {
-            const file = e.target.files?.[0] ?? null
+        <label>Foto del documento</label>
+        <SceltaFoto
+          disabilitato={inLettura}
+          onFoto={(file) => {
             setFoto(file)
             setLettura(null)
-            if (file) void leggiLaFoto(file)
+            void leggiLaFoto(file)
           }}
         />
         <p className="aiuto">

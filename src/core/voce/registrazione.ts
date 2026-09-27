@@ -140,12 +140,16 @@ interface RiconoscimentoVocale {
   onend: (() => void) | null
 }
 
-function creaRiconoscimento(lingua: string): RiconoscimentoVocale | null {
+function costruttoreRiconoscimento(): (new () => RiconoscimentoVocale) | undefined {
   const w = window as unknown as {
     SpeechRecognition?: new () => RiconoscimentoVocale
     webkitSpeechRecognition?: new () => RiconoscimentoVocale
   }
-  const Costruttore = w.SpeechRecognition ?? w.webkitSpeechRecognition
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition
+}
+
+function creaRiconoscimento(lingua: string): RiconoscimentoVocale | null {
+  const Costruttore = costruttoreRiconoscimento()
   if (!Costruttore) return null
 
   const r = new Costruttore()
@@ -159,7 +163,43 @@ function creaRiconoscimento(lingua: string): RiconoscimentoVocale | null {
 }
 
 export function trascrizioneDisponibile(): boolean {
-  return creaRiconoscimento('it-IT') !== null
+  return costruttoreRiconoscimento() !== undefined
+}
+
+/**
+ * Ricompone l'intera trascrizione dall'elenco dei risultati.
+ *
+ * ## Perché si rifà tutto da capo ogni volta
+ *
+ * La versione precedente sommava i pezzi man mano che arrivavano
+ * (`testoFinale += ...`). Sembra ragionevole e invece produce questo:
+ *
+ *     vediamo Vediamo Vediamo cosa Vediamo cosa scrive Vediamo cosa scrive 15 kg
+ *
+ * Il motivo: il riconoscimento **rimanda gli stessi risultati più volte** — li
+ * corregge mentre uno parla, e quando li dà per definitivi li ripropone. Ogni
+ * rinvio veniva sommato di nuovo, e la frase ricresceva a ogni giro.
+ *
+ * `e.results` contiene sempre **tutti** i risultati della sessione, dal primo.
+ * Quindi la cosa giusta è ricostruire da zero e assegnare, mai sommare: così
+ * la funzione si può ripetere quante volte si vuole senza cambiare l'esito.
+ */
+export function componiTrascrizione(risultati: ArrayLike<RisultatoRiconoscimento>): {
+  finale: string
+  provvisorio: string
+} {
+  let finale = ''
+  let provvisorio = ''
+
+  for (let i = 0; i < risultati.length; i++) {
+    const risultato = risultati[i]
+    const testo = risultato?.[0]?.transcript ?? ''
+    if (!testo) continue
+    if (risultato.isFinal) finale += testo.trim() + ' '
+    else provvisorio += testo
+  }
+
+  return { finale: finale.trim(), provvisorio: provvisorio.trim() }
 }
 
 function motivoDaCodice(codice?: string): MotivoMancataTrascrizione {
@@ -182,51 +222,86 @@ function motivoDaCodice(codice?: string): MotivoMancataTrascrizione {
  * Trascrive mentre si parla. **Non tocca il microfono con nient'altro**: è
  * tutto il punto.
  */
+const RIAVVII_MASSIMI = 20
+
 export class Trascrittore {
   private riconoscimento: RiconoscimentoVocale | null = null
+  /** Testo delle sessioni già chiuse: non va perso quando se ne apre una nuova. */
+  private accumulato = ''
   private testoFinale = ''
   private testoProvvisorio = ''
   private motivo: MotivoMancataTrascrizione | undefined
   private fine: Promise<void> = Promise.resolve()
   private iniziatoIl = 0
   private chiudi: () => void = () => {}
+  private fermatoDaNoi = false
+  private riavvii = 0
 
   constructor(private lingua = 'it-IT') {}
 
   /** Falso se il browser non sa trascrivere: allora si passa all'audio. */
   avvia(): boolean {
-    this.riconoscimento = creaRiconoscimento(this.lingua)
-    if (!this.riconoscimento) {
+    // Si controlla solo se il browser ce l'ha, senza costruirne uno a vuoto.
+    if (!costruttoreRiconoscimento()) {
       this.motivo = 'non_supportato'
       return false
     }
 
+    this.accumulato = ''
     this.testoFinale = ''
     this.testoProvvisorio = ''
     this.motivo = undefined
+    this.fermatoDaNoi = false
+    this.riavvii = 0
     this.iniziatoIl = Date.now()
     this.fine = new Promise<void>((risolvi) => {
       this.chiudi = risolvi
     })
 
-    this.riconoscimento.onresult = (e) => {
-      let provvisorio = ''
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const risultato = e.results[i]
-        const testo = risultato[0]?.transcript ?? ''
-        if (risultato.isFinal) this.testoFinale += testo + ' '
-        else provvisorio += testo
-      }
+    return this.apriSessione()
+  }
+
+  /**
+   * Apre una sessione di ascolto.
+   *
+   * Il riconoscimento si chiude da solo dopo una pausa un po' lunga — succede
+   * di continuo mentre si racconta qualcosa pensandoci su. Quando capita si
+   * mette da parte quello che ha già capito e si riapre: senza, il pezzo di
+   * frase detto prima della pausa andrebbe perso.
+   */
+  private apriSessione(): boolean {
+    const r = creaRiconoscimento(this.lingua)
+    if (!r) return false
+    this.riconoscimento = r
+
+    r.onresult = (e) => {
+      // Si riscrive tutto da capo: sommare i pezzi faceva ricrescere la frase
+      // a ogni rinvio. Vedi `componiTrascrizione`.
+      const { finale, provvisorio } = componiTrascrizione(e.results)
+      this.testoFinale = finale
       this.testoProvvisorio = provvisorio
     }
-    this.riconoscimento.onerror = (e) => {
+
+    r.onerror = (e) => {
       this.motivo = motivoDaCodice(e?.error)
+      // Su un errore non si riprova: se il servizio non risponde, riaprire
+      // venti volte non lo fa rispondere, e intanto scalda la batteria.
+      this.fermatoDaNoi = true
       this.chiudi()
     }
-    this.riconoscimento.onend = () => this.chiudi()
+
+    r.onend = () => {
+      if (this.fermatoDaNoi || this.riavvii >= RIAVVII_MASSIMI) {
+        this.chiudi()
+        return
+      }
+      this.riavvii++
+      this.metteDaParte()
+      if (!this.apriSessione()) this.chiudi()
+    }
 
     try {
-      this.riconoscimento.start()
+      r.start()
       return true
     } catch {
       this.motivo = 'sconosciuto'
@@ -236,7 +311,17 @@ export class Trascrittore {
     }
   }
 
+  private metteDaParte(): void {
+    const pezzo = (this.testoFinale + ' ' + this.testoProvvisorio).trim()
+    if (pezzo) this.accumulato = (this.accumulato + ' ' + pezzo).trim()
+    this.testoFinale = ''
+    this.testoProvvisorio = ''
+  }
+
   async ferma(): Promise<EsitoVoce> {
+    // Prima si dichiara che la chiusura è voluta, poi si ferma: altrimenti
+    // `onend` riaprirebbe una sessione nuova invece di concludere.
+    this.fermatoDaNoi = true
     try {
       this.riconoscimento?.stop()
     } catch {
@@ -247,7 +332,11 @@ export class Trascrittore {
     await Promise.race([this.fine, attendi(2500)])
 
     const durataSec = Math.round((Date.now() - this.iniziatoIl) / 1000)
-    const testo = (this.testoFinale + ' ' + this.testoProvvisorio).trim()
+    const testo = [this.accumulato, this.testoFinale, this.testoProvvisorio]
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim()
 
     if (testo) return { tipo: 'testo', testo, durataSec }
 
@@ -256,6 +345,7 @@ export class Trascrittore {
   }
 
   annulla(): void {
+    this.fermatoDaNoi = true
     try {
       this.riconoscimento?.abort()
     } catch {
