@@ -7,35 +7,8 @@ spostata nel `01-diario.md` con la data e il motivo.
 
 ## In lavorazione adesso (27/09/2026)
 
-### C1 — Le schede lette non si possono rivedere né correggere dopo
-
-Segnalato provando una bolletta dell'acqua. In fase di **inserimento** l'app
-mostra tutto quello che ha letto — numero, data, importi — con la percentuale di
-sicurezza e la riga da cui viene. Una volta **salvato**, nella scheda restano
-solo il numero e la scadenza: il resto non si vede più e non si può correggere.
-
-È una falla nel principio dell'app (*tu butti dentro, la macchina struttura, tu
-correggi*): la correzione deve restare possibile **sempre**, non solo nei
-trenta secondi dell'inserimento.
-
-Da fare: archiviare nel documento i campi letti (valore, sicurezza, riga di
-provenienza) e il testo grezzo, e mostrarli nella scheda tutti modificabili.
-
-### C2 — Il tipo di documento decide come viene letto, e se si sbaglia esce spazzatura
-
-Stesso episodio. La bolletta diceva chiaramente *"fattura n° 2026/00300138 del
-04/06/2026"* e *"scadenza pagamento 06/07/2026"*, ma la scheda ha tirato fuori
-una scadenza del **20 febbraio 2028**, presa da chissà quale altra data del
-documento.
-
-Causa: il tipo scelto nel menù decide quale lettore gira. Se il documento è una
-fattura ma il tipo dice "patentino", gira il lettore delle scadenze, che cerca
-*la data futura più lontana* — e su una bolletta piena di date trova quella
-sbagliata.
-
-Da fare: **riconoscere da solo** che tipo di documento è, leggendo il testo; e
-permettere di cambiare tipo **rileggendo il testo già acquisito**, senza
-rifotografare.
+C1 (schede non più correggibili dopo il salvataggio) e C2 (il tipo scelto nel
+menù decideva il lettore) sono chiuse: vedi il diario del 27/09 pomeriggio.
 
 ### C3 — Precisione della lettura sulle fatture vere
 

@@ -71,6 +71,44 @@ describe('composizione della trascrizione', () => {
     expect(testo).not.toMatch(/Vediamo.*Vediamo/)
   })
 
+  it('Android: la frase ripresa da capo a ogni risultato si legge una volta sola', () => {
+    /*
+     * Ricostruita dallo schermo del telefono (27/09), dettando "proviamo di
+     * nuovo e vediamo cosa legge". Il test di sopra imitava il telefono come
+     * lo immaginavo; questo com'era. Ogni risultato riparte dall'inizio, ed è
+     * già marcato definitivo. L'ultimo corregge: sparisce la "e".
+     */
+    const elenco = risultati(
+      ['proviamo', true],
+      ['proviamo', true],
+      ['proviamo di', true],
+      ['proviamo di nuovo', true],
+      ['proviamo di nuovo e', true],
+      ['proviamo di nuovo e', true],
+      ['proviamo di nuovo e vediamo', true],
+      ['proviamo di nuovo e vediamo', true],
+      ['proviamo di nuovo e vediamo cosa', true],
+      ['proviamo di nuovo vediamo cosa legge', true],
+    )
+    const { finale, provvisorio } = componiTrascrizione(elenco)
+    expect(finale).toBe('proviamo di nuovo vediamo cosa legge')
+    expect(provvisorio).toBe('')
+  })
+
+  it('Android: anche con l’ultimo pezzo ancora provvisorio', () => {
+    const { finale, provvisorio } = componiTrascrizione(
+      risultati(['dato il', true], ['dato il rame', true], ['Dato il rame alla vi', false]),
+    )
+    expect((finale + ' ' + provvisorio).trim()).toBe('Dato il rame alla vi')
+  })
+
+  it('due frasi diverse che si somigliano restano due frasi', () => {
+    const { finale } = componiTrascrizione(
+      risultati(['dato il rame alla vigna', true], ['dato il rame al frutteto', true]),
+    )
+    expect(finale).toBe('dato il rame alla vigna dato il rame al frutteto')
+  })
+
   it('non si confonde con i risultati vuoti', () => {
     const { finale } = componiTrascrizione(risultati(['', true], ['rame', true], ['', false]))
     expect(finale).toBe('rame')

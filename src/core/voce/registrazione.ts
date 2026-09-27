@@ -183,23 +183,136 @@ export function trascrizioneDisponibile(): boolean {
  * `e.results` contiene sempre **tutti** i risultati della sessione, dal primo.
  * Quindi la cosa giusta è ricostruire da zero e assegnare, mai sommare: così
  * la funzione si può ripetere quante volte si vuole senza cambiare l'esito.
+ *
+ * ## Il secondo difetto: Chrome su Android
+ *
+ * Ricostruire da zero non bastava. Dettando "proviamo di nuovo e vediamo cosa
+ * legge" usciva:
+ *
+ *     proviamo proviamo proviamo di proviamo di nuovo proviamo di nuovo e ...
+ *
+ * Su Android l'elenco dei risultati non contiene pezzi di frase uno dopo
+ * l'altro, come sul computer: contiene **la stessa frase ripresa da capo e
+ * allungata a ogni risultato** — "proviamo", "proviamo di", "proviamo di
+ * nuovo"... E ognuno arriva già marcato come definitivo. Metterli in fila dava
+ * la frase ripetuta dieci volte.
+ *
+ * Regola: se un risultato **riprende** quello prima (ne contiene quasi tutte le
+ * parole, nello stesso ordine) allora lo sostituisce; se no, lo segue. Il
+ * "quasi" serve perché nel riprendere il riconoscimento corregge: una volta ha
+ * scritto "e vediamo cosa", la volta dopo "vediamo cosa legge", senza la "e".
  */
 export function componiTrascrizione(risultati: ArrayLike<RisultatoRiconoscimento>): {
   finale: string
   provvisorio: string
 } {
-  let finale = ''
-  let provvisorio = ''
+  const pezzi: { testo: string; definitivo: boolean }[] = []
 
   for (let i = 0; i < risultati.length; i++) {
     const risultato = risultati[i]
-    const testo = risultato?.[0]?.transcript ?? ''
+    const testo = (risultato?.[0]?.transcript ?? '').trim()
     if (!testo) continue
-    if (risultato.isFinal) finale += testo.trim() + ' '
-    else provvisorio += testo
+    const pezzo = { testo, definitivo: Boolean(risultato.isFinal) }
+
+    const precedente = pezzi[pezzi.length - 1]
+    if (precedente && riprende(testo, precedente.testo)) pezzi[pezzi.length - 1] = pezzo
+    else pezzi.push(pezzo)
   }
 
-  return { finale: finale.trim(), provvisorio: provvisorio.trim() }
+  const unisci = (definitivo: boolean) =>
+    pezzi
+      .filter((p) => p.definitivo === definitivo)
+      .map((p) => p.testo)
+      .join(' ')
+
+  return { finale: unisci(true), provvisorio: unisci(false) }
+}
+
+function parole(testo: string): string[] {
+  return testo
+    .toLowerCase()
+    .replace(/[.,;:!?«»"“”']/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+}
+
+/**
+ * Vero se `nuovo` è la stessa frase di `vecchio`, ripresa e magari allungata o
+ * corretta di una parola.
+ *
+ * Due frasi diverse che si somigliano ("dato il rame alla vigna" e poi "dato il
+ * rame al frutteto") **non** devono fondersi: per questo si chiede che quasi
+ * tutto il vecchio ci sia, e non solo metà.
+ */
+function riprende(nuovo: string, vecchio: string): boolean {
+  const n = parole(nuovo)
+  const v = parole(vecchio)
+  if (v.length === 0) return true
+  if (n.length < v.length - 1) return false
+  const comuni = sottosequenzaComune(n, v)
+  return comuni >= Math.max(1, Math.ceil(v.length * 0.8))
+}
+
+/** Quante parole di `a` e `b` compaiono in tutti e due, nello stesso ordine. */
+function sottosequenzaComune(a: string[], b: string[]): number {
+  const riga = new Array<number>(b.length + 1).fill(0)
+  for (let i = 1; i <= a.length; i++) {
+    let diagonale = 0
+    for (let j = 1; j <= b.length; j++) {
+      const sopra = riga[j]
+      riga[j] = a[i - 1] === b[j - 1] ? diagonale + 1 : Math.max(riga[j], riga[j - 1])
+      diagonale = sopra
+    }
+  }
+  return riga[b.length]
+}
+
+// ---------------------------------------------------------------------------
+// Cosa ha mandato davvero il telefono
+// ---------------------------------------------------------------------------
+
+/**
+ * Il difetto qui sopra l'avevo "corretto" una volta con un test che imitava il
+ * telefono **come immaginavo che fosse**, non com'era. Il test era verde e sul
+ * telefono non cambiava niente.
+ *
+ * Da qui questo registro: l'ultima dettatura si tiene così com'è arrivata, e si
+ * può leggere dalle Impostazioni. La prossima volta si parte dai dati veri.
+ */
+const CHIAVE_GREZZO = 'ultima-dettatura-grezza'
+
+export interface DettaturaGrezza {
+  quando: number
+  /** Una voce per sessione di ascolto: l'ultimo elenco di risultati ricevuto. */
+  sessioni: { testo: string; definitivo: boolean }[][]
+  errore?: string
+  risultato: string
+}
+
+export function ultimaDettaturaGrezza(): DettaturaGrezza | null {
+  try {
+    const s = localStorage.getItem(CHIAVE_GREZZO)
+    return s ? (JSON.parse(s) as DettaturaGrezza) : null
+  } catch {
+    return null
+  }
+}
+
+function salvaDettaturaGrezza(d: DettaturaGrezza): void {
+  try {
+    localStorage.setItem(CHIAVE_GREZZO, JSON.stringify(d))
+  } catch {
+    /* è solo un aiuto per capire: se non si salva, pazienza */
+  }
+}
+
+function copiaRisultati(
+  risultati: ArrayLike<RisultatoRiconoscimento>,
+): { testo: string; definitivo: boolean }[] {
+  return Array.from({ length: risultati.length }, (_, i) => ({
+    testo: risultati[i]?.[0]?.transcript ?? '',
+    definitivo: Boolean(risultati[i]?.isFinal),
+  }))
 }
 
 function motivoDaCodice(codice?: string): MotivoMancataTrascrizione {
@@ -236,6 +349,9 @@ export class Trascrittore {
   private chiudi: () => void = () => {}
   private fermatoDaNoi = false
   private riavvii = 0
+  /** Quello che il telefono ha mandato, così com'è: vedi `DettaturaGrezza`. */
+  private grezzo: { testo: string; definitivo: boolean }[][] = []
+  private codiceErrore: string | undefined
 
   constructor(private lingua = 'it-IT') {}
 
@@ -253,6 +369,8 @@ export class Trascrittore {
     this.motivo = undefined
     this.fermatoDaNoi = false
     this.riavvii = 0
+    this.grezzo = []
+    this.codiceErrore = undefined
     this.iniziatoIl = Date.now()
     this.fine = new Promise<void>((risolvi) => {
       this.chiudi = risolvi
@@ -273,8 +391,11 @@ export class Trascrittore {
     const r = creaRiconoscimento(this.lingua)
     if (!r) return false
     this.riconoscimento = r
+    const sessione = this.grezzo.length
+    this.grezzo.push([])
 
     r.onresult = (e) => {
+      this.grezzo[sessione] = copiaRisultati(e.results)
       // Si riscrive tutto da capo: sommare i pezzi faceva ricrescere la frase
       // a ogni rinvio. Vedi `componiTrascrizione`.
       const { finale, provvisorio } = componiTrascrizione(e.results)
@@ -283,6 +404,7 @@ export class Trascrittore {
     }
 
     r.onerror = (e) => {
+      this.codiceErrore = e?.error
       this.motivo = motivoDaCodice(e?.error)
       // Su un errore non si riprova: se il servizio non risponde, riaprire
       // venti volte non lo fa rispondere, e intanto scalda la batteria.
@@ -337,6 +459,13 @@ export class Trascrittore {
       .join(' ')
       .replace(/\s+/g, ' ')
       .trim()
+
+    salvaDettaturaGrezza({
+      quando: Date.now(),
+      sessioni: this.grezzo.filter((s) => s.length > 0),
+      errore: this.codiceErrore,
+      risultato: testo,
+    })
 
     if (testo) return { tipo: 'testo', testo, durataSec }
 

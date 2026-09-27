@@ -7,6 +7,58 @@ Voce più recente in cima.
 
 ---
 
+## 27 settembre 2026 (sera) — La dettatura ricresceva ancora
+
+Dettando *"proviamo di nuovo e vediamo cosa legge"* sul telefono usciva
+*"proviamo proviamo proviamo di proviamo di nuovo proviamo di nuovo e…"*.
+La correzione del giorno prima non aveva cambiato niente.
+
+**Perché la correzione di prima non funzionava.** Il test imitava il telefono
+**come me lo immaginavo**: un solo risultato che si allunga. Chrome su Android
+fa un'altra cosa: nell'elenco mette **tanti risultati, ognuno che riparte dalla
+prima parola** e arriva un po' più in là, e li dà già per definitivi. Metterli
+in fila ripeteva la frase dieci volte. Il test era verde, il telefono no.
+
+**Fatto:** un risultato che *riprende* quello prima (ne contiene almeno l'80%
+delle parole, nello stesso ordine) lo sostituisce invece di seguirlo. Il margine
+serve perché riprendendo il riconoscimento corregge: da "e vediamo cosa" a
+"vediamo cosa legge". Due frasi diverse che si somigliano restano due frasi.
+Il test nuovo usa la sequenza ricostruita dallo schermo del telefono.
+
+**Fatto: il registro dell'ultima dettatura** (*Impostazioni → Prova → Cosa ha
+mandato il telefono nell'ultima dettatura*). Tiene quello che il browser ha
+mandato, così com'è, con un pulsante Copia. **Lezione:** su un difetto che si
+vede solo sul telefono, prima si guardano i dati veri del telefono, poi si
+scrive il test. Altrimenti il test certifica un'ipotesi.
+
+---
+
+## 27 settembre 2026 (pomeriggio) — I documenti restano correggibili per sempre
+
+Segnalato provando una bolletta dell'acqua. Chiude C1 e C2 delle domande aperte.
+
+**Deciso: i campi letti si archiviano col documento** — valore, sicurezza, riga
+di provenienza — insieme al testo grezzo, e restano modificabili dalla scheda.
+Prima, dopo il salvataggio, restavano solo numero e scadenza: un dato letto male
+restava sbagliato per sempre. Era una falla nel gesto dell'app: *tu correggi*
+vale sempre, non solo nei trenta secondi dell'inserimento. Correggendo, il
+bollino di sicurezza diventa una spunta e la riga originale resta visibile.
+Numero e scadenza del documento seguono la correzione, altrimenti l'avviso
+avrebbe continuato a suonare sulla data vecchia.
+
+**Deciso: il genere del documento si riconosce dal testo, non dal menù.** La
+bolletta, archiviata come "patentino", finiva al lettore delle scadenze, che
+cerca la data futura più lontana e tirava fuori il 20/02/2028 invece del
+04/06/2026 scritto in chiaro. Il tipo scelto dall'uomo non deve decidere *come*
+si legge. Siccome il testo grezzo resta archiviato, si può **rileggere col
+criterio giusto senza rifotografare**.
+
+6 test nuovi sul caso della bolletta, 40 in totale, tutti verdi. Pubblicato.
+
+Resta aperta C3: la precisione della lettura sulle fatture vere.
+
+---
+
 ## 26-27 settembre 2026 — Prime prove sul telefono vero
 
 Prima sessione con l'app in mano all'agricoltore, su **Brave per Android**.

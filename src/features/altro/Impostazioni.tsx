@@ -11,6 +11,7 @@ import { giacenzePerLotto } from '../../core/db/query'
 import { LINGUE, getLingua, impostaLingua, t, type Lingua } from '../../core/i18n'
 import { caricaDatiDimostrativi } from '../../core/db/dimostrativo'
 import { contaRighe, eliminaDatiDimostrativi, svuotaTutto } from '../../core/db/pulizia'
+import UltimaDettatura from './UltimaDettatura'
 
 export default function Impostazioni({ azienda }: { azienda: Azienda }) {
   const [nome, setNome] = useState(azienda.nome)
@@ -233,6 +234,7 @@ export default function Impostazioni({ azienda }: { azienda: Azienda }) {
           Fotografa una fattura e guarda cosa ne ricava
         </p>
       </Link>
+      <UltimaDettatura />
       <button
         className="pulsante-secondario"
         onClick={async () => {
