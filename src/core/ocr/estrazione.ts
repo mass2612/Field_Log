@@ -138,6 +138,38 @@ function componiData(g: number, m: number, a: number): Giorno | undefined {
 }
 
 // ---------------------------------------------------------------------------
+// Che documento è
+// ---------------------------------------------------------------------------
+
+const SEGNI_FATTURA =
+  /\bfattura\b|\bft\.?\s*n\b|totale documento|totale da pagare|imponibile|\bp\.?\s*iva\b|aliquota|\biva\s*\d|bolletta|scadenza pagamento|importi fatturati/i
+
+const SEGNI_SCADENZA =
+  /certificat|abilitazion|patentin|patente|attestat|valido fino|valida fino|rilasciato a|idoneit[àa]|autorizzazione all/i
+
+/**
+ * Capisce da solo se è una fattura o un documento con scadenza.
+ *
+ * ## Perché serve
+ *
+ * Il tipo scelto nel menù decide quale lettore gira, e sbagliarlo produce
+ * numeri senza senso. Su una bolletta dell'acqua letta come se fosse un
+ * patentino, il lettore delle scadenze cercava *la data futura più lontana* e
+ * tirava fuori **20 febbraio 2028**, mentre il documento diceva chiaramente
+ * "fattura del 04/06/2026, scadenza pagamento 06/07/2026".
+ *
+ * Meglio guardare cosa c'è scritto, che fidarsi di un menù a tendina.
+ */
+export function riconosciGenere(testoGrezzo: string): 'fattura' | 'scadenza' {
+  const testo = correggiCifre(testoGrezzo)
+  const fattura = (testo.match(new RegExp(SEGNI_FATTURA, 'gi')) ?? []).length
+  const scadenza = (testo.match(new RegExp(SEGNI_SCADENZA, 'gi')) ?? []).length
+
+  // A parità, fattura: sono la gran parte dei documenti che si fotografano.
+  return scadenza > fattura ? 'scadenza' : 'fattura'
+}
+
+// ---------------------------------------------------------------------------
 // Fatture
 // ---------------------------------------------------------------------------
 

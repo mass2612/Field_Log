@@ -3,7 +3,7 @@
 **Se hai perso il filo — o la memoria — leggi questo file per primo.**
 Dovrebbe bastare da solo a farti ripartire senza fare domande a nessuno.
 
-Ultimo aggiornamento: **20 settembre 2026**
+Ultimo aggiornamento: **27 settembre 2026**
 
 ---
 
@@ -194,6 +194,33 @@ fitosanitari. Senza, niente tempi di carenza certi né vincoli, e metà
 dell'intelligenza dell'app resta spenta.
 
 ---
+
+## 6-bis. L'app è online, e si prova dal telefono
+
+**https://mass2612.github.io/Field_Log/** — deposito `mass2612/Field_Log`
+(pubblico: GitHub Pages gratis funziona solo così).
+
+Per ripubblicare dopo una modifica: **`npm run pubblica`**. Il link non cambia.
+
+Ognuno che apre il link si ritrova **il proprio quaderno vuoto**: i dati stanno
+nel telefono di chi lo apre, non c'è nessun server e niente è condiviso.
+
+Per ripartire puliti: *Impostazioni → Quando si comincia sul serio* — si può
+togliere solo il finto oppure svuotare tutto. Le prove di lettura fatte nel
+**banco di prova** non salvano niente.
+
+## 6-ter. Quello che si impara solo sul telefono
+
+Prima sessione di prove sul campo (26-27/09), su Brave per Android. Quasi tutto
+quello che si è rotto era **invisibile dal computer**:
+
+- microfono e registratore che si contendono l'apparecchio;
+- il dito che si stacca dal pulsante al minimo movimento;
+- `capture` sulla fotocamera che ogni browser interpreta a modo suo;
+- la trascrizione che arriva a pezzi, ripetuti e corretti più volte.
+
+> **Regola: ogni funzione che tocca microfono, fotocamera o dita va provata sul
+> telefono prima di dirla finita.** Il computer serve solo a scrivere il codice.
 
 ## 7. Se riprendi in mano il progetto
 

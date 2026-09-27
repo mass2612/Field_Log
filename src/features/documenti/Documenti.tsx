@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import type {
+  CampoLetto,
   Allegato,
   Azienda,
   Documento,
@@ -10,6 +11,8 @@ import type {
 } from '../../core/domain/types'
 import { db, modificaTracciata, oggi, traccia } from '../../core/db/db'
 import {
+  campiDellaScheda,
+  interpretaTesto,
   leggiDocumento,
   type CampoEstratto,
   type EsitoOcr,
@@ -165,19 +168,20 @@ function SchedaDocumento({ documento, aziendaId }: { documento: Documento; azien
         </>
       ) : (
         <>
-          {documento.numero && (
-            <div className="riga-dato">
-              <span className="etichetta">Numero</span>
-              <span className="valore">{documento.numero}</span>
-            </div>
-          )}
           <div className="riga-dato">
             <span className="etichetta">Scade il</span>
             <span className="valore">{fmtData(documento.scadeIl)}</span>
           </div>
 
+          {/*
+            Tutto quello che è stato letto, sempre visibile e sempre
+            correggibile. Prima spariva dopo il salvataggio, e un numero
+            sbagliato restava sbagliato per sempre.
+          */}
+          <CampiLetti documento={documento} aziendaId={aziendaId} />
+
           <button className="link-testo" onClick={() => setApertaModifica(true)}>
-            ✏️ Correggi la scheda
+            ✏️ Correggi descrizione e scadenza
           </button>
 
           {modificato && (
@@ -202,7 +206,11 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
   const [erroreLettura, setErroreLettura] = useState<string | null>(null)
 
   const definizione = TIPI.find((x) => x.valore === tipo)!
-  const genere: GenereDocumento = tipo === 'altro' ? 'fattura' : 'scadenza'
+  /*
+   * Il tipo scelto nel menù **non** decide più come si legge il documento: lo
+   * decide quello che c'è scritto sopra. Una bolletta letta come patentino
+   * tirava fuori una scadenza del 2028 presa a caso.
+   */
 
   /**
    * Il gesto dell'app: tu butti dentro la foto, la macchina la legge, tu
@@ -215,7 +223,7 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
     setProgresso(0)
 
     try {
-      const esito = await leggiDocumento(file, genere, {
+      const esito = await leggiDocumento(file, 'auto', {
         oggi: oggi(),
         onProgresso: setProgresso,
       })
@@ -270,6 +278,12 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
         scadeIl: scadenza || undefined,
         preavvisoGiorni: definizione.preavviso,
         allegatoId,
+        // Si archivia tutto quello che è stato letto, col testo grezzo: così
+        // la scheda resta correggibile e rileggibile anche fra sei mesi.
+        campiLetti: lettura ? campiDellaScheda(lettura.scheda) : undefined,
+        testoLetto: lettura?.lettura.testoGrezzo,
+        fiduciaLettura: lettura?.fiducia,
+        genereLettura: lettura?.scheda.tipo,
       }) as Documento,
     )
 
@@ -466,5 +480,148 @@ function EsitoLettura({ esito }: { esito: EsitoOcr }) {
       </button>
       {testoAperto && <pre className="testo-grezzo">{esito.lettura.testoGrezzo}</pre>}
     </div>
+  )
+}
+
+/**
+ * I campi ricavati dalla foto, **sempre modificabili**.
+ *
+ * Era la falla segnalata provando una bolletta: durante l'inserimento l'app
+ * mostrava tutto quello che aveva letto, con la percentuale e la riga di
+ * provenienza; dopo il salvataggio restavano solo numero e scadenza, e il resto
+ * non si poteva più né vedere né correggere.
+ *
+ * Il principio dell'app è che si corregge sempre, non solo nei trenta secondi
+ * in cui si fotografa.
+ */
+function CampiLetti({ documento, aziendaId }: { documento: Documento; aziendaId: ID }) {
+  const [inModifica, setInModifica] = useState<string | null>(null)
+  const [bozza, setBozza] = useState('')
+  const [rileggendo, setRileggendo] = useState(false)
+
+  const campi = documento.campiLetti ?? []
+  if (campi.length === 0 && !documento.testoLetto) return null
+
+  /** Salva la correzione di un campo, e allinea i dati che fanno scattare gli avvisi. */
+  async function salvaCampo(campo: CampoLetto) {
+    const aggiornati = campi.map((c) =>
+      c.chiave === campo.chiave
+        ? { ...c, valore: bozza.trim(), fiducia: 1, corretto: true, riga: c.riga }
+        : c,
+    )
+
+    const modifiche: Partial<Documento> = { campiLetti: aggiornati }
+    // I campi che contano per le scadenze vanno tenuti allineati, altrimenti
+    // si corregge la data e l'avviso continua a suonare su quella vecchia.
+    if (campo.chiave === 'scadeIl') modifiche.scadeIl = bozza.trim() || undefined
+    if (campo.chiave === 'numero') modifiche.numero = bozza.trim() || undefined
+
+    await modificaTracciata(db.documenti, 'documenti', documento.id, modifiche, { aziendaId })
+    setInModifica(null)
+  }
+
+  /** Rilegge dal testo già acquisito: non serve rifotografare. */
+  async function rileggiCome(genere: GenereDocumento) {
+    if (!documento.testoLetto) return
+    setRileggendo(true)
+    try {
+      const scheda = interpretaTesto(documento.testoLetto, genere, oggi())
+      const nuovi = campiDellaScheda(scheda)
+      const scadenza = nuovi.find((c) => c.chiave === 'scadeIl')?.valore
+      const numero = nuovi.find((c) => c.chiave === 'numero')?.valore
+
+      await modificaTracciata(
+        db.documenti,
+        'documenti',
+        documento.id,
+        {
+          campiLetti: nuovi,
+          genereLettura: genere,
+          ...(scadenza ? { scadeIl: scadenza } : {}),
+          ...(numero ? { numero } : {}),
+        },
+        { aziendaId },
+      )
+    } finally {
+      setRileggendo(false)
+    }
+  }
+
+  const genere = documento.genereLettura ?? 'scadenza'
+  const altroGenere: GenereDocumento = genere === 'fattura' ? 'scadenza' : 'fattura'
+
+  return (
+    <>
+      <h2 className="titolo-sezione">Letto dalla foto</h2>
+
+      {campi.map((campo) => (
+        <div key={campo.chiave} className="dato-letto">
+          {inModifica === campo.chiave ? (
+            <>
+              <label htmlFor={`c-${documento.id}-${campo.chiave}`}>{campo.etichetta}</label>
+              <input
+                id={`c-${documento.id}-${campo.chiave}`}
+                value={bozza}
+                onChange={(e) => setBozza(e.target.value)}
+                type={campo.chiave.endsWith('Il') || campo.chiave === 'data' ? 'date' : 'text'}
+                autoFocus
+              />
+              <div className="pila" style={{ marginTop: 8 }}>
+                <button className="pulsante-principale" onClick={() => void salvaCampo(campo)}>
+                  Salva
+                </button>
+                <button className="pulsante-secondario" onClick={() => setInModifica(null)}>
+                  Lascia stare
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="riga-dato" style={{ borderBottom: 'none', paddingBottom: 2 }}>
+                <span className="etichetta">{campo.etichetta}</span>
+                <span className="valore">
+                  {campo.valore}
+                  <span
+                    className={`bollino-fiducia ${campo.fiducia < 0.6 ? 'incerto' : ''}`}
+                    title={campo.corretto ? 'corretto a mano' : 'letto dalla foto'}
+                  >
+                    {campo.corretto ? '✓' : `${Math.round(campo.fiducia * 100)}%`}
+                  </span>
+                </span>
+              </div>
+              {campo.riga && <p className="riga-origine">letto da: «{campo.riga}»</p>}
+              <button
+                type="button"
+                className="link-testo"
+                onClick={() => {
+                  setBozza(campo.valore)
+                  setInModifica(campo.chiave)
+                }}
+              >
+                correggi
+              </button>
+            </>
+          )}
+        </div>
+      ))}
+
+      {documento.testoLetto && (
+        <>
+          <p className="aiuto" style={{ marginTop: 12 }}>
+            Interpretato come <strong>{genere === 'fattura' ? 'fattura' : 'documento con scadenza'}</strong>.
+            Se i dati non tornano, quasi sempre è perché è stato letto col criterio sbagliato.
+          </p>
+          <button
+            type="button"
+            className="pulsante-secondario"
+            onClick={() => void rileggiCome(altroGenere)}
+            disabled={rileggendo}
+          >
+            🔁 {rileggendo ? 'Rileggo…' : `Rileggi come ${altroGenere === 'fattura' ? 'fattura' : 'documento con scadenza'}`}
+          </button>
+          <p className="aiuto">Non serve rifotografare: il testo è già qui.</p>
+        </>
+      )}
+    </>
   )
 }

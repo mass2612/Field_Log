@@ -7,6 +7,71 @@ Voce più recente in cima.
 
 ---
 
+## 26-27 settembre 2026 — Prime prove sul telefono vero
+
+Prima sessione con l'app in mano all'agricoltore, su **Brave per Android**.
+Quasi tutto quello che si è rotto era invisibile dal computer.
+
+### Note vocali — quattro difetti in fila
+
+**Registrava e non trascriveva mai.** Avviavo *insieme* il registratore audio e
+il riconoscimento vocale: **si contendono il microfono**, il registratore lo
+prende per primo e alla trascrizione non arriva niente. Ora sono separati e si
+usa **uno alla volta**: prima si prova a trascrivere e nessun altro tocca il
+microfono; solo se fallisce si registra l'audio. Verificato con un contatore che
+durante la trascrizione `getUserMedia` non venga chiamato nemmeno una volta.
+
+**Il messaggio mentiva.** Diceva sempre "manca la rete", qualunque fosse la
+causa, e ha fatto perdere tempo a controllare una rete che funzionava. Ora si
+legge il codice d'errore vero; se non lo si conosce, l'app dice che non lo sa.
+L'app ricorda **anche il perché** su quel telefono, così non racconta un motivo
+a caso alla registrazione dopo.
+
+**La frase ricresceva.** Uscivano cose come
+*"vediamo Vediamo cosa Vediamo cosa scrive Vediamo cosa scrive 15 kg"*.
+Il riconoscimento **rimanda gli stessi risultati più volte** mentre corregge, e
+io li sommavo a ogni rinvio. Ora la trascrizione si ricompone da zero a ogni
+evento (`componiTrascrizione`): è **idempotente**, quindi ripetere gli eventi non
+cambia niente. Otto test lo bloccano, fra cui la sequenza vera vista sul telefono.
+
+**Le pause tagliavano la nota.** Il riconoscimento si chiude da solo dopo un
+silenzio; il pezzo detto prima spariva. Ora si mette da parte e si riapre una
+sessione, con un tetto ai riavvii e nessun riavvio dopo un errore.
+
+**Il dito si staccava.** Bastava spostarlo di un millimetro e `onPointerLeave`
+fermava tutto. Ora il dito è agganciato con `setPointerCapture`. Aggiunti il
+**tocco secco** (registra finché non ritocchi) e il cronometro.
+
+### Interfaccia
+
+**"Pasticciato".** Il microfono era un riquadro grande quanto Salva e attaccato
+al testo: due comandi principali sulla stessa schermata, e il pollice sbagliava.
+Ora è un **bottone tondo dentro l'angolo del riquadro del testo** — è un modo di
+scrivere, non un'azione — e il pulsante grande torna a essere **uno solo: Salva**.
+
+### Foto
+
+**"Fotografa" non fotografava, "Scegli file" sì.** L'attributo `capture` è solo
+un *suggerimento* e ogni browser lo interpreta a modo suo. Niente indovinelli:
+due pulsanti espliciti, **Scatta una foto** e **Scegli un file**
+(`src/ui/SceltaFoto.tsx`), usati in Documenti e nel banco di prova.
+
+### Cose imparate, che valgono oltre questi difetti
+
+1. **Il computer non basta per collaudare.** Microfono, fotocamera e dita si
+   comportano diversamente sul telefono. Ogni funzione che li tocca va provata lì.
+2. **Un messaggio che indovina la causa è peggio di nessun messaggio.**
+3. Quando un dato arriva a pezzi e ripetuti, **ricostruire da zero** batte
+   sempre l'accumulo: l'operazione diventa ripetibile senza conseguenze.
+
+---
+
+## 20 settembre 2026 (notte) — Pubblicata e provabile dal telefono
+
+Vedi le voci sotto per GitHub Pages e il modulo di lettura documenti.
+
+---
+
 ## 20 settembre 2026 (sera) — L'app è online
 
 **https://mass2612.github.io/Field_Log/** — deposito `mass2612/Field_Log`.

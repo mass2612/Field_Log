@@ -262,6 +262,28 @@ export type SoggettoDocumento =
   | { tipo: 'attrezzo'; id: ID }
   | { tipo: 'azienda'; id: ID }
 
+/**
+ * Un dato ricavato leggendo la foto di un documento.
+ *
+ * Si conserva insieme al documento — non solo durante l'inserimento — perché
+ * **la correzione deve restare possibile sempre**. La prima versione mostrava
+ * i campi letti solo nei trenta secondi in cui si fotografava: dopo sparivano,
+ * e un numero sbagliato restava sbagliato per sempre.
+ *
+ * Porta con sé la riga da cui è stato preso: è così che si controlla un dato
+ * in due secondi invece di rileggere tutta la fattura.
+ */
+export interface CampoLetto {
+  chiave: string
+  etichetta: string
+  valore: string
+  /** Da 0 a 1. Diventa 1 quando lo corregge una persona. */
+  fiducia: number
+  /** La riga del documento da cui viene. Vuota se l'ha scritto l'utente. */
+  riga: string
+  corretto?: boolean
+}
+
 export interface Documento extends Tracciato {
   aziendaId: ID
   soggetto: SoggettoDocumento
@@ -275,6 +297,21 @@ export interface Documento extends Tracciato {
   /** Giorni di preavviso. Se assente vale il valore predefinito dell'azienda. */
   preavvisoGiorni?: number
   note?: string
+
+  /** Tutto quello che la macchina ha letto dalla foto, sempre correggibile. */
+  campiLetti?: CampoLetto[]
+  /**
+   * Il testo grezzo uscito dalla foto.
+   *
+   * Si conserva per due motivi: permette di **rileggere i campi senza
+   * rifotografare** quando ci si accorge di aver sbagliato il tipo di
+   * documento, e lascia all'utente il modo di cercare a mano un dato che la
+   * macchina non ha trovato.
+   */
+  testoLetto?: string
+  fiduciaLettura?: number
+  /** Con quale lettore è stato interpretato: 'fattura' o 'scadenza'. */
+  genereLettura?: string
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  riconosciGenere,
   correggiCifre,
   estraiFattura,
   estraiScadenza,
@@ -232,6 +233,67 @@ describe('uscita vera di Tesseract', () => {
     expect(zolfo?.prezzoUnitario).toBe(2.1)
     expect(zolfo?.importo).toBe(105)
     expect(zolfo?.unitaMisura).toBe('kg')
+  })
+})
+
+/**
+ * Il caso della bolletta dell'acqua, arrivato dal campo.
+ *
+ * Fotografata e archiviata come se fosse un patentino, dava una scadenza del
+ * **20 febbraio 2028** — presa da chissà quale data — mentre il documento
+ * diceva "fattura del 04/06/2026, scadenza pagamento 06/07/2026".
+ */
+const BOLLETTA_ACQUA = `
+BCV SERVIZIO IDRICO INTEGRATO
+INFORMA CHE IL NUOVO GESTORE E' INDY ACQUE SPA
+fattura n° 2026/00300138 del 04/06/2026
+Tipo Bollettazione: Stimata
+
+MEDIASTAR MARTA MARIA
+VIA ROMA 44
+15206 GIAROLE AL
+
+Totale da pagare  Euro 181,26
+Scadenza pagamento 06/07/2026
+
+DETTAGLIO IMPORTI FATTURATI
+Quota fissa            13,74
+Acquedotto            26,20
+Fognatura             12,08
+Depurazione           41,08
+TOTALE DOCUMENTO     181,26
+
+Contratto attivo dal 20/02/2028
+`
+
+describe('capire che documento è', () => {
+  it('riconosce una bolletta come fattura, anche se l’utente dice patentino', () => {
+    expect(riconosciGenere(BOLLETTA_ACQUA)).toBe('fattura')
+  })
+
+  it('riconosce un patentino', () => {
+    expect(riconosciGenere(PATENTINO)).toBe('scadenza')
+  })
+
+  it('riconosce una fattura di consorzio', () => {
+    expect(riconosciGenere(FATTURA_CONSORZIO)).toBe('fattura')
+  })
+})
+
+describe('la bolletta dell’acqua letta come fattura', () => {
+  const scheda = estraiFattura(BOLLETTA_ACQUA)
+
+  it('prende la data della fattura, non una data qualsiasi', () => {
+    expect(scheda.data?.valore).toBe('2026-06-04')
+  })
+
+  it('non si lascia ingannare dalla data lontana in fondo', () => {
+    expect(scheda.data?.valore).not.toBe('2028-02-20')
+  })
+
+  it('prende il numero e il totale', () => {
+    expect(scheda.numero?.valore).toBe('2026/00300138')
+    expect(scheda.totale?.valore).toBe(181.26)
   })
 })
 
