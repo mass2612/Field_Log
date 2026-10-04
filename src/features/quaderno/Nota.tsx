@@ -2,7 +2,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { argomentoDi } from '../../core/domain/note'
 import { annulla, db } from '../../core/db/db'
-import { fmtData, fmtIstante } from '../../core/i18n'
+import { fmtData, fmtIstante, fmtScritta } from '../../core/i18n'
 
 /**
  * Una nota aperta.
@@ -29,7 +29,10 @@ export default function Nota() {
   return (
     <>
       <div className="nota-intestazione" style={{ marginBottom: 10 }}>
-        <strong style={{ fontSize: 20 }}>{fmtData(nota.dataFatto)}</strong>
+        <strong style={{ fontSize: 20 }}>
+          {fmtData(nota.dataFatto)}{' '}
+          <span className="nota-ora">· {fmtScritta(nota.creatoIl, nota.dataFatto)}</span>
+        </strong>
         {nota.campoNome && (
           <Link
             to={`/campi/nome/${encodeURIComponent(nota.campoNome)}`}

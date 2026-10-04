@@ -3,7 +3,7 @@
 **Se hai perso il filo — o la memoria — leggi questo file per primo.**
 Dovrebbe bastare da solo a farti ripartire senza fare domande a nessuno.
 
-Ultimo aggiornamento: **27 settembre 2026**
+Ultimo aggiornamento: **4 ottobre 2026**
 
 ---
 
@@ -160,7 +160,8 @@ sole quando c'è un problema · quaderno cronologico con ricerca e raggruppament
 scrittura con campo piccolo facoltativo, testo grande e microfono · lettura
 automatica della nota (data dalla frase, campo, argomenti, prodotti e quantità) ·
 i campi che nascono dalle note · documenti con scheda correggibile · meteo di
-oggi nella barra.
+oggi nella barra · previsione delle prossime ore in home · ora di
+registrazione su ogni nota.
 
 **Motore già costruito prima** — tempo di carenza che blocca la raccolta ·
 controlli di dose e limiti · magazzino con giacenze dedotte dai movimenti ·

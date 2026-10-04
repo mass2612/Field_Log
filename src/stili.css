@@ -990,3 +990,78 @@ textarea {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Il tempo di oggi, in cima alla home
+ * ------------------------------------------------------------------------- */
+
+.tempo-oggi {
+  margin: 0;
+}
+
+.tempo-adesso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tempo-icona {
+  font-size: 34px;
+}
+
+.tempo-gradi {
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.tempo-estremi {
+  color: var(--testo-tenue);
+  font-size: 16px;
+}
+
+.tempo-frase {
+  margin: 10px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Sei colonne in fila: stanno in un telefono senza scorrere di lato. */
+.tempo-ore {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 12px;
+  border-top: 1px solid var(--bordo);
+  padding-top: 10px;
+}
+
+.tempo-ora {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tempo-ora-ora {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.tempo-ora-gradi {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.tempo-ora-dettaglio {
+  font-size: 12px;
+  color: var(--testo-tenue);
+  white-space: nowrap;
+  min-height: 1em;
+}
+
+.nota-ora {
+  font-weight: 400;
+  color: var(--testo-tenue);
+}

@@ -7,6 +7,38 @@ Voce più recente in cima.
 
 ---
 
+## 4 ottobre 2026 — L'ora sulle note, il meteo solo come previsione
+
+Dettatura confermata **impeccabile** sul telefono.
+
+**Deciso: sulla nota basta l'ora in cui è stata scritta** (14:32 accanto alla
+data). Valutato di ricavare dalla frase anche l'ora del lavoro ("stamattina alle
+7"): scartato. Se chi compila vuole un'altra ora la scrive nel testo; l'app non
+deve gestire due orari. Unica accortezza: se la nota è scritta un altro giorno
+rispetto al fatto ("ieri ho dato il rame"), l'ora da sola accanto alla data del
+fatto ingannerebbe. Allora compare *"scritta il 4 ott alle 18:34"*.
+
+**Deciso: niente meteo attaccato alle note.** Sarebbero tre numeri in croce,
+presi al momento in cui si scrive (spesso la sera) da un modello con celle di
+qualche chilometro. Quando l'agricoltore vorrà incrociare lavori e tempo, il
+dato si prende **allora** dallo storico di Open-Meteo, che lo tiene per anni.
+Non si perde niente a non accumularlo prima. Questo supera anche la vecchia
+decisione del 13/09 di registrare il meteo tutti i giorni: non è mai stato
+costruito davvero (si teneva solo quello di oggi), e ora non serve.
+
+**Fatto: la previsione in home**, in cima alle piastrelle. Gradi adesso, minima
+e massima, una frase che risponde alla domanda della mattina (*"pioggia
+probabile dalle 16"* oppure *"niente pioggia nelle prossime ore"*, più le
+raffiche se superano i 20 km/h) e sei colonne ogni due ore. Si riscarica ogni
+ora; senza rete mostra l'ultima previsione **con l'ora a cui risale**.
+Senza la posizione dell'azienda invita a segnarla.
+
+**Deciso: il meteo di base è gratis, il di più a pagamento** (più giorni,
+avvisi, stazione propria). Prima idea concreta di cosa mettere nella versione
+a pagamento.
+
+---
+
 ## 27 settembre 2026 (sera) — La dettatura ricresceva ancora
 
 Dettando *"proviamo di nuovo e vediamo cosa legge"* sul telefono usciva

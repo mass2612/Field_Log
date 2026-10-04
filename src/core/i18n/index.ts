@@ -213,6 +213,32 @@ export function fmtIstante(iso?: string, conOra = false): string {
   }).format(d)
 }
 
+/** L'ora, "14:32", in ora locale. */
+export function fmtOra(iso?: string): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return new Intl.DateTimeFormat(linguaCorrente, { hour: '2-digit', minute: '2-digit' }).format(d)
+}
+
+/**
+ * Quando è stata scritta una nota, da mettere accanto alla data del fatto.
+ *
+ * Si mostra **l'ora in cui è stata registrata**, non un'ora del lavoro dedotta
+ * dalla frase: deciso il 04/10/2026, basta questa. Se però la nota è stata
+ * scritta un altro giorno ("ieri ho dato il rame"), mettere solo l'ora accanto
+ * alla data del fatto farebbe credere che il lavoro sia di quell'ora: allora si
+ * dice per esteso quando è stata scritta.
+ */
+export function fmtScritta(creatoIl: string, giornoFatto: string): string {
+  const d = new Date(creatoIl)
+  if (Number.isNaN(d.getTime())) return ''
+  const giornoScritta = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  if (giornoScritta === giornoFatto) return fmtOra(creatoIl)
+  const giorno = new Intl.DateTimeFormat(linguaCorrente, { day: 'numeric', month: 'short' }).format(d)
+  return `scritta il ${giorno} alle ${fmtOra(creatoIl)}`
+}
+
 export function fmtData(giorno?: string): string {
   if (!giorno) return '—'
   const [a, m, g] = giorno.split('-').map(Number)

@@ -60,7 +60,7 @@ export default function App() {
 
         <span className="barra-destra">
           {meteo && (
-            <Link to="/meteo" className="meteo-oggi" title="Il tempo di oggi">
+            <Link to="/" className="meteo-oggi" title="Il tempo di oggi">
               <span aria-hidden>{meteo.icona}</span>
               <span>{Math.round(meteo.temperaturaC)}°</span>
               {meteo.pioggiaMm > 0 && <span>{meteo.pioggiaMm} mm</span>}
@@ -81,7 +81,7 @@ export default function App() {
 
       <main className="contenuto">
         <Routes>
-          <Route path="/" element={<Home azienda={azienda} avvisi={avvisi} />} />
+          <Route path="/" element={<Home azienda={azienda} avvisi={avvisi} meteo={meteo} />} />
 
           <Route path="/quaderno" element={<Quaderno azienda={azienda} />} />
           <Route path="/quaderno/scrivi" element={<ScriviNota azienda={azienda} />} />

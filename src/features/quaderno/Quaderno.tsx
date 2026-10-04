@@ -5,7 +5,7 @@ import type { Azienda } from '../../core/domain/types'
 import { ARGOMENTI, argomentoDi, type Nota } from '../../core/domain/note'
 import { db } from '../../core/db/db'
 import { cercaNote } from '../../core/db/note'
-import { fmtData, fmtIstante } from '../../core/i18n'
+import { fmtData, fmtIstante, fmtScritta } from '../../core/i18n'
 
 /**
  * Il quaderno: le note in ordine di tempo.
@@ -124,7 +124,10 @@ function RigaNota({ nota }: { nota: Nota }) {
   return (
     <Link to={`/quaderno/${nota.id}`} className="scheda scheda-cliccabile nota">
       <div className="nota-intestazione">
-        <span className="nota-data">{fmtData(nota.dataFatto)}</span>
+        <span className="nota-data">
+          {fmtData(nota.dataFatto)}{' '}
+          <span className="nota-ora">· {fmtScritta(nota.creatoIl, nota.dataFatto)}</span>
+        </span>
         {nota.campoNome && <span className="etichetta-piccola">{nota.campoNome}</span>}
       </div>
 

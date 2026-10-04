@@ -7,6 +7,8 @@ import { campiDalleNote } from '../../core/db/note'
 import { giacenzePerProdotto } from '../../core/db/query'
 import { differenzaGiorni } from '../../core/rules/carenza'
 import { fmtNumero } from '../../core/i18n'
+import type { MeteoGiorno } from '../../core/meteo/meteo'
+import TempoOggi from './TempoOggi'
 
 /**
  * La home: quattro bottoni grossi, in colonna.
@@ -16,7 +18,15 @@ import { fmtNumero } from '../../core/i18n'
  * *che* c'è un problema: si vede subito *dove*. Per un anziano vale più di una
  * campanella in alto che apre un elenco.
  */
-export default function Home({ azienda, avvisi }: { azienda: Azienda; avvisi: Avviso[] }) {
+export default function Home({
+  azienda,
+  avvisi,
+  meteo,
+}: {
+  azienda: Azienda
+  avvisi: Avviso[]
+  meteo?: MeteoGiorno
+}) {
   const stato = useLiveQuery(async () => {
     const [note, campi, giacenze, documenti] = await Promise.all([
       db.note.where('aziendaId').equals(azienda.id).toArray(),
@@ -45,6 +55,8 @@ export default function Home({ azienda, avvisi }: { azienda: Azienda; avvisi: Av
 
   return (
     <div className="piastrelle">
+      <TempoOggi azienda={azienda} meteo={meteo} />
+
       <Piastrella
         a="/quaderno"
         icona="📓"

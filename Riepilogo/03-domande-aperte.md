@@ -38,6 +38,13 @@ frequenza di aggiornamento, costo.
 Nel frattempo l'app funziona con prodotti inseriti a mano, marcati `fonte:
 'manuale'` e segnalati come non verificati.
 
+### B3 — Il meteo è gratis solo per uso non commerciale
+
+La previsione in home viene da Open-Meteo: niente chiavi, niente
+registrazione, ma **gratis solo per uso non commerciale**. Il giorno che l'app
+si vende serve il loro abbonamento oppure un'altra fonte. Da decidere prima del
+lancio, insieme a cosa del meteo va nella versione a pagamento.
+
 ### B2 — Uso personale o prodotto da vendere
 
 Già risposto: **prodotto da vendere**. Ne discendono però decisioni non ancora
