@@ -312,6 +312,12 @@ export interface Documento extends Tracciato {
   fiduciaLettura?: number
   /** Con quale lettore è stato interpretato: 'fattura' o 'scadenza'. */
   genereLettura?: string
+  /**
+   * Se serve alla legge sul quaderno. **Vuoto = decide la proposta dell'app**
+   * (le regole stanno nel pacchetto paese); valorizzato solo quando
+   * l'agricoltore sposta il documento a mano, e allora vince la sua scelta.
+   */
+  perLaLegge?: boolean
 }
 
 // ---------------------------------------------------------------------------

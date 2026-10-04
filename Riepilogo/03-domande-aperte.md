@@ -38,6 +38,50 @@ frequenza di aggiornamento, costo.
 Nel frattempo l'app funziona con prodotti inseriti a mano, marcati `fonte:
 'manuale'` e segnalati come non verificati.
 
+### B0 — Dal 1° gennaio 2027 il quaderno digitale è obbligatorio (SIAN)
+
+Emerso il 04/10/2026. Il Reg. UE 2023/564 impone il registro dei trattamenti
+in formato elettronico; l'Italia lo realizza col **Quaderno di Campagna
+Digitale Aziendale (QDCA)** dentro il SIAN, legato al fascicolo aziendale, e
+comprende trattamenti **e fertilizzazioni**. Rinviato due volte: volontario
+fino al 31/12/2026, **obbligatorio dal 1/1/2027** (Reg. UE 2025/2203).
+Restano: registrazione entro 30 giorni, conservazione di registro e documenti
+d'acquisto per almeno 3 anni. *[da verificare sui testi ufficiali]*
+
+**Perché è la domanda più importante che abbiamo:** se l'agricoltore deve
+comunque ribattere tutto sul SIAN, la nostra app gli raddoppia il lavoro
+invece di toglierglielo. Da chiarire subito: il SIAN accetta dati da software
+di terzi (servizi, file in un formato stabilito)? Con quale accreditamento?
+La risposta decide se l'app è "il quaderno" o "il blocco note prima del
+quaderno".
+
+**Cosa dice il documento ufficiale** (AGEA, Istruzioni operative n. 58 del
+21/05/2024, letto per intero il 04/10/2026):
+
+- Due strade per alimentare il QDCA: la **maschera del portale SIAN**, oppure i
+  **servizi di interoperabilità**. Il documento li descrive **per i CAA** (e
+  per i sistemi regionali già esistenti, es. ARTEA in Toscana). Di un accesso
+  diretto per un'azienda di software **non parla**.
+- I servizi sono tre: *Ottieni Piano Colturale Grafico*, *Invio Massivo
+  Registro dei Trattamenti*, *Ottieni Stato di Caricamento*. Le specifiche
+  tecniche non sono pubbliche.
+- **Ogni trattamento va riferito a un appezzamento del Piano Colturale
+  Grafico** del fascicolo. I nostri "campi che nascono dalle note" dovranno
+  potersi agganciare a quelle particelle.
+- Per i trattamenti su colture chiede **data e ora di inizio**, quantità per
+  ettaro, avversità. Per i macchinari la data del controllo funzionale; per gli
+  operatori il numero del patentino. Poi concimazioni, irrigazioni, magazzino.
+- Fatture d'acquisto dei fitosanitari (e moduli d'acquisto dei prodotti
+  tossici e nocivi): da conservare **3 anni**.
+
+**Strada più probabile:** un accordo con un CAA (Coldiretti, Confagricoltura,
+CIA…): noi raccogliamo i dati senza fatica, il CAA li trasmette coi servizi a
+cui è abilitato. In alternativa chiedere ad AGEA se e come un'azienda di
+software può essere abilitata. **Da fare: contattare un CAA.**
+
+**Il rovescio buono:** il servizio *Ottieni Piano Colturale Grafico* darebbe
+all'app tutti i campi dell'azienda già pronti, senza scriverli a mano.
+
 ### B3 — Il meteo è gratis solo per uso non commerciale
 
 La previsione in home viene da Open-Meteo: niente chiavi, niente

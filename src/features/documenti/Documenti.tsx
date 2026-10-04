@@ -20,6 +20,7 @@ import {
 } from '../../core/ocr'
 import SceltaFoto from '../../ui/SceltaFoto'
 import { fmtData, fmtIstante } from '../../core/i18n'
+import { serveAllaLegge } from '../../packs/it/documenti'
 
 /**
  * Documenti.
@@ -56,7 +57,26 @@ export default function Documenti({ azienda }: { azienda: Azienda }) {
       .sort((a, b) => (a.scadeIl ?? '9999').localeCompare(b.scadeIl ?? '9999'))
   }, [azienda.id])
 
+  // I fitosanitari che l'azienda ha già: un nome commerciale sulla fattura
+  // dice "serve alla legge" meglio di qualunque parola generica.
+  const nomiFitosanitari = useLiveQuery(
+    async () =>
+      (await db.prodotti.where('aziendaId').equals(azienda.id).toArray())
+        .filter((p) => p.tipo === 'fitosanitario' && !p.annullatoIl)
+        .map((p) => p.nome),
+    [azienda.id],
+  )
+
   if (!documenti) return <p>Carico…</p>
+
+  /*
+   * Due gruppi: quelli che servono alla legge sul quaderno, e tutti gli altri.
+   * Li divide l'app leggendo il documento; l'agricoltore sposta con un tocco
+   * quelli che ha messo nel posto sbagliato.
+   */
+  const conEsito = documenti.map((d) => ({ d, legale: serveAllaLegge(d, nomiFitosanitari ?? []) }))
+  const perLaLegge = conEsito.filter((x) => x.legale.serve)
+  const altri = conEsito.filter((x) => !x.legale.serve)
 
   return (
     <>
@@ -82,14 +102,43 @@ export default function Documenti({ azienda }: { azienda: Azienda }) {
           </p>
         </div>
       ) : (
-        documenti.map((d) => <SchedaDocumento key={d.id} documento={d} aziendaId={azienda.id} />)
+        <>
+          {perLaLegge.length > 0 && (
+            <>
+              <h2 className="titolo-sezione">⚖️ Servono alla legge ({perLaLegge.length})</h2>
+              <p className="aiuto" style={{ marginTop: -4 }}>
+                Patentino, controllo dell’irroratrice, fatture di fitosanitari e concimi. Le
+                fatture vanno conservate tre anni.
+              </p>
+              {perLaLegge.map(({ d, legale }) => (
+                <SchedaDocumento key={d.id} documento={d} aziendaId={azienda.id} legale={legale} />
+              ))}
+            </>
+          )}
+          {altri.length > 0 && (
+            <>
+              <h2 className="titolo-sezione">📁 Altri documenti ({altri.length})</h2>
+              {altri.map(({ d, legale }) => (
+                <SchedaDocumento key={d.id} documento={d} aziendaId={azienda.id} legale={legale} />
+              ))}
+            </>
+          )}
+        </>
       )}
     </>
   )
 }
 
 /** La scheda ricavata dal documento — sempre correggibile. */
-function SchedaDocumento({ documento, aziendaId }: { documento: Documento; aziendaId: ID }) {
+function SchedaDocumento({
+  documento,
+  aziendaId,
+  legale,
+}: {
+  documento: Documento
+  aziendaId: ID
+  legale: ReturnType<typeof serveAllaLegge>
+}) {
   const [apertaModifica, setApertaModifica] = useState(false)
   const [descrizione, setDescrizione] = useState(documento.descrizione)
   const [numero, setNumero] = useState(documento.numero ?? '')
@@ -112,6 +161,17 @@ function SchedaDocumento({ documento, aziendaId }: { documento: Documento; azien
     setApertaModifica(false)
   }
 
+  /** Sposta il documento nell'altro gruppo: la scelta dell'agricoltore vince. */
+  async function sposta() {
+    await modificaTracciata(
+      db.documenti,
+      'documenti',
+      documento.id,
+      { perLaLegge: !legale.serve },
+      { aziendaId },
+    )
+  }
+
   return (
     <div className="scheda">
       <div className="nota-intestazione">
@@ -119,6 +179,13 @@ function SchedaDocumento({ documento, aziendaId }: { documento: Documento; azien
           {tipo?.icona} {documento.descrizione}
         </strong>
       </div>
+
+      <p className="aiuto" style={{ marginTop: 4 }}>
+        {legale.motivo}{' '}
+        <button type="button" className="link-testo" onClick={() => void sposta()}>
+          {legale.serve ? 'Non serve alla legge? Spostalo' : 'Serve alla legge? Spostalo'}
+        </button>
+      </p>
 
       {immagine?.blob && (
         <img
@@ -236,6 +303,9 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
           setDescrizione(`${definizione.etichetta} — ${esito.scheda.intestatario.valore}`)
         }
       } else {
+        // Il menù partiva da "Patentino": una bolletta salvata senza toccarlo
+        // diventava un patentino, e finiva fra i documenti per la legge.
+        setTipo('altro')
         if (esito.scheda.numero) setNumero(esito.scheda.numero.valore)
         if (esito.scheda.fornitore) {
           setDescrizione(

@@ -7,6 +7,34 @@ Voce più recente in cima.
 
 ---
 
+## 4 ottobre 2026 (sera) — Documenti per la legge, e la scoperta del QDCA
+
+**Fatto: i documenti divisi in due gruppi**, *"Servono alla legge"* e *"Altri
+documenti"*. Li divide l'app leggendo il documento, e ogni scheda dice
+**perché** ("ci sono prodotti fitosanitari: la fattura va conservata tre
+anni"). Un tocco su *Spostalo* e vince la scelta dell'agricoltore. Le regole
+stanno in `src/packs/it/documenti.ts`, perché sono norma italiana.
+Servono alla legge: patentino, controllo dell'irroratrice, fatture con
+fitosanitari (riconosciuti anche dai nomi in magazzino) o concimi. Le bollette
+no. Corretto anche un tranello: il menù partiva da "Patentino", e una bolletta
+salvata senza toccarlo diventava un patentino.
+
+**Sulla lettura:** luce e acqua sono i documenti più difficili da leggere e
+quelli che alla legge non servono. La precisione va cercata sulle fatture di
+fitosanitari e concimi e sui patentini. Servono fatture vere per provarla.
+
+**Scoperto: dal 1/1/2027 il quaderno digitale (QDCA, sul SIAN) è
+obbligatorio.** Il committente: *"lo integreremo assolutamente prima che lo
+facciano altri"*. Letto per intero il documento AGEA (Istruzioni operative
+n. 58): dettagli e strada proposta in `03-domande-aperte.md`, B0.
+Due conseguenze per il codice, da non dimenticare:
+1. Per i trattamenti il QDCA chiede **data e ora di inizio**. La decisione di
+   oggi ("basta l'ora di registrazione") va rivista **solo per i trattamenti**.
+2. Ogni trattamento va riferito a un **appezzamento del Piano Colturale
+   Grafico**: i campi dell'app dovranno potersi agganciare alle particelle.
+
+---
+
 ## 4 ottobre 2026 — L'ora sulle note, il meteo solo come previsione
 
 Dettatura confermata **impeccabile** sul telefono.
