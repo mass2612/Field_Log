@@ -1,7 +1,8 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import type { Azienda } from '../../core/domain/types'
-import { db, oggi } from '../../core/db/db'
+import type { Azienda, Campo } from '../../core/domain/types'
+import { db, modificaTracciata, oggi } from '../../core/db/db'
 import { annataCorrente, mappaProdotti } from '../../core/db/query'
 import { statoCarenzaCampo } from '../../core/rules/carenza'
 import { testoNota } from '../../packs/it/registro'
@@ -61,6 +62,8 @@ export default function DettaglioCampo({ azienda }: { azienda: Azienda }) {
         {colturaCorrente ? ` · ${colturaCorrente.specie}` : ''}
         {colturaCorrente?.varieta ? ` (${colturaCorrente.varieta})` : ''}
       </p>
+
+      <AppezzamentoPac campo={campo} />
 
       {/* Il primo dato che deve saltare all'occhio. */}
       {carenza.bloccata ? (
@@ -162,5 +165,79 @@ export default function DettaglioCampo({ azienda }: { azienda: Azienda }) {
         </>
       )}
     </>
+  )
+}
+
+/**
+ * L'aggancio del campo all'appezzamento della domanda PAC.
+ *
+ * L'Europa chiede di identificare l'area trattata con l'unità della domanda
+ * PAC sulla mappa, non col nome che usa l'agricoltore. Si scrive una volta, e
+ * da lì ogni trattamento su questo campo esce nell'elenco per il SIAN col
+ * riferimento giusto. Quando ci sarà il collegamento col fascicolo aziendale
+ * arriverà da solo.
+ */
+function AppezzamentoPac({ campo }: { campo: Campo }) {
+  const [inModifica, setInModifica] = useState(false)
+  const [valore, setValore] = useState(campo.appezzamentoPac ?? '')
+
+  async function salva() {
+    await modificaTracciata(
+      db.campi,
+      'campi',
+      campo.id,
+      { appezzamentoPac: valore.trim() || undefined },
+      { aziendaId: campo.aziendaId },
+    )
+    setInModifica(false)
+  }
+
+  if (!inModifica) {
+    return (
+      <div className="riga-dato">
+        <span className="etichetta">Appezzamento PAC</span>
+        <span className="valore">
+          {campo.appezzamentoPac ?? (
+            <button type="button" className="link-testo" onClick={() => setInModifica(true)}>
+              aggancia
+            </button>
+          )}
+          {campo.appezzamentoPac && (
+            <button
+              type="button"
+              className="link-testo"
+              style={{ marginLeft: 8 }}
+              onClick={() => setInModifica(true)}
+            >
+              correggi
+            </button>
+          )}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="scheda">
+      <label htmlFor="appezzamento-pac">Appezzamento nella domanda PAC</label>
+      <input
+        id="appezzamento-pac"
+        value={valore}
+        onChange={(e) => setValore(e.target.value)}
+        placeholder="Come compare nel fascicolo aziendale"
+        autoFocus
+      />
+      <p className="aiuto">
+        Lo trovi nel piano colturale grafico del fascicolo aziendale, o te lo dice il CAA.
+      </p>
+      <div className="pila">
+        <button className="pulsante-principale" onClick={() => void salva()}>
+          Salva
+        </button>
+        <button className="pulsante-secondario" onClick={() => setInModifica(false)}>
+          Lascia stare
+        </button>
+      </div>
+    </div>
   )
 }

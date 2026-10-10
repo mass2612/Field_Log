@@ -82,6 +82,16 @@ export interface Campo extends Tracciato {
   nome: string
   superficieHa: number
   particelle: Particella[]
+  /**
+   * L'appezzamento a cui corrisponde nella domanda PAC sulla mappa.
+   *
+   * Il Reg. UE 2023/564 chiede di identificare l'area trattata con "l'unità
+   * fondiaria della domanda di aiuto geospaziale": non il nome che usa
+   * l'agricoltore, e nemmeno direttamente il catasto. In Italia è
+   * l'appezzamento del piano colturale grafico del fascicolo aziendale.
+   * "Il pero" resta "il pero": questo è solo l'aggancio, da fare una volta.
+   */
+  appezzamentoPac?: string
   /** Contorno del campo in GeoJSON, se disegnato o importato. */
   geometria?: GeoJSONPoligono
   /** Centro del campo: usato per il riconoscimento GPS quando manca il contorno. */

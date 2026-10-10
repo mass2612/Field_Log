@@ -7,6 +7,36 @@ Voce più recente in cima.
 
 ---
 
+## 10 ottobre 2026 (sera) — L'elenco per il SIAN, e un buco nel registro
+
+**Verificato sul testo europeo** (Reg. di esecuzione UE 2023/564, allegato,
+su EUR-Lex): per i trattamenti in campo servono prodotto e numero di
+autorizzazione, data e **ora di inizio "se pertinente"**, dose, ettari,
+quantità per ettaro, coltura (codici EPPO, eventualmente stadio BBCH), e
+l'area trattata identificata con **l'unità della domanda PAC sulla mappa**.
+Non il catasto direttamente, e non il nome che usa l'agricoltore. AGEA
+(istruzioni n. 58) aggiunge avversità, numero del patentino, data del
+controllo funzionale.
+
+**Deciso: i nomi dei campi restano quelli dell'agricoltore** ("il pero", "la
+marcita"). Ogni campo si aggancia **una volta** al suo appezzamento PAC
+(`Campo.appezzamentoPac`); quando ci sarà il collegamento al fascicolo
+arriverà da solo.
+
+**Trovato un buco serio:** il registro dei trattamenti leggeva solo i vecchi
+"interventi", non le note. Un trattamento scritto come nota non ci finiva:
+il "registro che si forma da solo dalle note" non era vero.
+
+**Fatto: l'elenco per il quaderno digitale**, in cima alla pagina del
+registro. Si forma dalle note (trattamenti e concimazioni), una riga per
+prodotto, con le colonne del regolamento. Prima di tutto dice **quanto è
+pronto**: righe complete, e cosa manca più spesso. Non inventa niente: un
+dato assente resta vuoto e finisce fra i mancanti. L'ora di inizio la prende
+solo se la frase la dice ("alle 7"). Si scarica come foglio di calcolo.
+Regole in `src/packs/it/qdca.ts`, 8 test.
+
+---
+
 ## 10 ottobre 2026 — Il flusso dei documenti, e l'incontro con Confagricoltura
 
 **Scartato: importare le fatture elettroniche (XML).** Le avevo proposte

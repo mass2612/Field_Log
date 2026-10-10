@@ -5,6 +5,7 @@ import { PACCHETTO_IT, righeRegistroTrattamenti } from '../../packs/it/registro'
 import { scaricaCsv, toCsv } from '../../core/export/csv'
 import { aggiungiGiorni } from '../../core/rules/carenza'
 import { fmtData, t } from '../../core/i18n'
+import ElencoQdca from './ElencoQdca'
 
 /**
  * Modalità controllo.
@@ -53,6 +54,10 @@ export default function Ispezione({ azienda }: { azienda: Azienda }) {
 
   return (
     <>
+      {/* Prima l'elenco che si forma dalle note: è quello che va sul SIAN. */}
+      <ElencoQdca azienda={azienda} />
+
+      <h2 className="titolo-sezione">Registro da stampare</h2>
       <div className="scheda">
         <strong style={{ fontSize: 18 }}>{PACCHETTO_IT.nomeRegistro}</strong>
         <p className="aiuto" style={{ marginTop: 6 }}>
