@@ -228,4 +228,5 @@ quello che si è rotto era **invisibile dal computer**:
 1. Leggi questo file.
 2. Leggi `01-diario.md` per capire cosa è successo e perché.
 3. Guarda `03-domande-aperte.md`: lì stanno le decisioni ancora da prendere.
-4. Poi vai al codice.
+4. Se c'è un incontro in vista o appena fatto, guarda `05-incontro-confagricoltura.md`.
+5. Poi vai al codice.

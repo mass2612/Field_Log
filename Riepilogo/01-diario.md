@@ -7,6 +7,32 @@ Voce più recente in cima.
 
 ---
 
+## 10 ottobre 2026 — Il flusso dei documenti, e l'incontro con Confagricoltura
+
+**Scartato: importare le fatture elettroniche (XML).** Le avevo proposte
+perché il dato è esatto e la foto lo ricostruisce male. Il committente:
+*"l'utente, anche il più tecnologico, non si mette a cercare via PEC le sue
+fatture"*. Ha ragione: se costa fatica, non si fa. Resta una porta aperta senza
+fatica per l'utente: farsele dare dal CAA o dal commercialista, che spesso le
+hanno già. È una domanda per Confagricoltura.
+
+**Scartato: tarare la lettura sui moduli dei singoli fornitori.** Ogni
+agricoltore ha fornitori diversi: si ricomincerebbe da capo a ogni utente.
+
+**Deciso: la foto resta.** Serve come archivio da mostrare quando un ispettore
+chiede le fatture dei diserbanti che hai in magazzino.
+
+**Deciso: il flusso dei documenti in quattro passi.** (1) leggi la foto,
+(2) riconosci se serve al quaderno o ad altro, (3) manda le informazioni al
+commercialista, (4) prepara il file per il SIAN, o almeno un elenco dettagliato
+nell'ordine della maschera, così il tempo di caricamento scende.
+
+**Mercoledì 14/10: incontro col direttore di Confagricoltura.** Confagricoltura
+ha un CAA, e i servizi AGEA per il quaderno sono descritti per i CAA. Domande
+in `05-incontro-confagricoltura.md`.
+
+---
+
 ## 4 ottobre 2026 (sera) — Documenti per la legge, e la scoperta del QDCA
 
 **Fatto: i documenti divisi in due gruppi**, *"Servono alla legge"* e *"Altri
