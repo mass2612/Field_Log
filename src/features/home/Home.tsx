@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import type { Azienda } from '../../core/domain/types'
 import type { Avviso } from '../../core/rules/scadenze'
 import { db, oggi } from '../../core/db/db'
+import { eRaccomandazione } from '../../core/domain/note'
 import { campiDalleNote } from '../../core/db/note'
 import { giacenzePerProdotto } from '../../core/db/query'
 import { differenzaGiorni } from '../../core/rules/carenza'
@@ -35,7 +36,9 @@ export default function Home({
       db.documenti.where('aziendaId').equals(azienda.id).toArray(),
     ])
 
-    const vive = note.filter((n) => !n.annullatoIl)
+    const tutteVive = note.filter((n) => !n.annullatoIl)
+    const vive = tutteVive.filter((n) => !eRaccomandazione(n))
+    const raccomandazioniDaFare = tutteVive.filter((n) => eRaccomandazione(n) && !n.fattaIl).length
     const ultima = vive
       .map((n) => n.dataFatto)
       .sort()
@@ -43,6 +46,7 @@ export default function Home({
 
     return {
       numeroNote: vive.length,
+      raccomandazioniDaFare,
       ultimaNota: ultima,
       numeroCampi: campiDalleNote(vive, campi).length,
       prodottiConGiacenza: [...giacenze.values()].filter((q) => q > 0).length,
@@ -66,7 +70,10 @@ export default function Home({
           stato
             ? stato.numeroNote === 0
               ? 'nessuna nota — comincia da qui'
-              : `${stato.numeroNote} note · ultima ${quando(stato.ultimaNota)}`
+              : `${stato.numeroNote} note · ultima ${quando(stato.ultimaNota)}` +
+                (stato.raccomandazioniDaFare > 0
+                  ? ` · 📌 ${stato.raccomandazioniDaFare} da fare`
+                  : '')
             : undefined
         }
       />

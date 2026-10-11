@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { Azienda } from '../../core/domain/types'
-import { ARGOMENTI, argomentoDi, type Nota } from '../../core/domain/note'
+import { ARGOMENTI, argomentoDi, eRaccomandazione, type Nota } from '../../core/domain/note'
 import { db } from '../../core/db/db'
 import { cercaNote } from '../../core/db/note'
 import { fmtData, fmtIstante, fmtScritta } from '../../core/i18n'
@@ -18,15 +18,33 @@ export default function Quaderno({ azienda }: { azienda: Azienda }) {
   const [ricerca, setRicerca] = useState('')
   const [ricercaAperta, setRicercaAperta] = useState(false)
   const [argomentoScelto, setArgomentoScelto] = useState<string>('')
+  /*
+   * Due sezioni: le note (cosa è successo) e le raccomandazioni (cosa andrà
+   * fatto). Si sceglie in cima; si apre su quella appena salvata.
+   */
+  const [parametri, setParametri] = useSearchParams()
+  const sezione = parametri.get('sezione') === 'raccomandazioni' ? 'raccomandazioni' : 'note'
+  const scegliSezione = (s: 'note' | 'raccomandazioni') => {
+    setArgomentoScelto('')
+    setParametri(s === 'note' ? {} : { sezione: s }, { replace: true })
+  }
 
-  const note = useLiveQuery(async () => {
+  const tutte = useLiveQuery(async () => {
     const tutte = await db.note.where('aziendaId').equals(azienda.id).toArray()
     return tutte
       .filter((n) => !n.annullatoIl)
       .sort((a, b) => b.dataFatto.localeCompare(a.dataFatto) || b.creatoIl.localeCompare(a.creatoIl))
   }, [azienda.id])
 
-  if (!note) return <p>Carico…</p>
+  if (!tutte) return <p>Carico…</p>
+
+  const raccomandazioni = tutte.filter(eRaccomandazione)
+  const daFare = raccomandazioni.filter((r) => !r.fattaIl).length
+  // Prima quelle ancora da fare, poi quelle fatte.
+  const note =
+    sezione === 'note'
+      ? tutte.filter((n) => !eRaccomandazione(n))
+      : [...raccomandazioni].sort((a, b) => Number(Boolean(a.fattaIl)) - Number(Boolean(b.fattaIl)))
 
   const conteggi = new Map<string, number>()
   for (const nota of note) {
@@ -54,6 +72,25 @@ export default function Quaderno({ azienda }: { azienda: Azienda }) {
           style={{ maxWidth: 140 }}
         >
           🔍 Cerca
+        </button>
+      </div>
+
+      <div className="schede-quaderno" role="tablist">
+        <button
+          role="tab"
+          aria-selected={sezione === 'note'}
+          className={`scheda-quaderno ${sezione === 'note' ? 'attiva' : ''}`}
+          onClick={() => scegliSezione('note')}
+        >
+          📓 Note ({tutte.length - raccomandazioni.length})
+        </button>
+        <button
+          role="tab"
+          aria-selected={sezione === 'raccomandazioni'}
+          className={`scheda-quaderno blu ${sezione === 'raccomandazioni' ? 'attiva' : ''}`}
+          onClick={() => scegliSezione('raccomandazioni')}
+        >
+          📌 Raccomandazioni{daFare > 0 ? ` (${daFare} da fare)` : ''}
         </button>
       </div>
 
@@ -90,7 +127,7 @@ export default function Quaderno({ azienda }: { azienda: Azienda }) {
       )}
 
       {/* L'unica schermata burocratica dell'app, e si apre solo se la cerchi. */}
-      {argomentoAttivo?.legale && (
+      {sezione === 'note' && argomentoAttivo?.legale && (
         <div className="scheda" style={{ borderColor: 'var(--verde)' }}>
           <strong>Questo gruppo serve anche alla legge</strong>
           <p className="aiuto" style={{ marginTop: 6 }}>
@@ -108,7 +145,9 @@ export default function Quaderno({ azienda }: { azienda: Azienda }) {
             📓
           </span>
           {note.length === 0
-            ? 'Il quaderno è vuoto. Scrivi la prima nota.'
+            ? sezione === 'raccomandazioni'
+              ? 'Nessuna raccomandazione. Scrivi cosa andrà fatto e premi “Salva raccomandazione”.'
+              : 'Il quaderno è vuoto. Scrivi la prima nota.'
             : 'Nessuna nota con questi filtri.'}
         </div>
       ) : (
@@ -122,7 +161,10 @@ function RigaNota({ nota }: { nota: Nota }) {
   const modificata = nota.modificatoIl !== nota.creatoIl
 
   return (
-    <Link to={`/quaderno/${nota.id}`} className="scheda scheda-cliccabile nota">
+    <Link
+      to={`/quaderno/${nota.id}`}
+      className={`scheda scheda-cliccabile nota ${nota.fattaIl ? 'raccomandazione-fatta' : ''}`}
+    >
       <div className="nota-intestazione">
         <span className="nota-data">
           {fmtData(nota.dataFatto)}{' '}
@@ -139,6 +181,8 @@ function RigaNota({ nota }: { nota: Nota }) {
           return a ? <span key={chiave}>{a.icona}</span> : null
         })}
         {nota.daVoce && <span>🎙️</span>}
+        {nota.fotoAllegatiId?.length ? <span>📷 {nota.fotoAllegatiId.length}</span> : null}
+        {nota.fattaIl && <span>✓ fatta il {fmtIstante(nota.fattaIl)}</span>}
         {nota.trascrizioneDaRileggere && <span title="da rileggere">✏️</span>}
         {modificata && (
           <span className="nota-modificata">modificato il {fmtIstante(nota.modificatoIl)}</span>

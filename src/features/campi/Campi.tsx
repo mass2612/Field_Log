@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { Azienda } from '../../core/domain/types'
-import { argomentoDi } from '../../core/domain/note'
+import { argomentoDi, eRaccomandazione, type Nota } from '../../core/domain/note'
 import { db, oggi } from '../../core/db/db'
 import { campiDalleNote } from '../../core/db/note'
 import { mappaProdotti } from '../../core/db/query'
@@ -49,23 +49,57 @@ export default function Campi({ azienda }: { azienda: Azienda }) {
   if (!dati) return <p>Carico…</p>
 
   if (filtro) {
-    const note = dati.note
+    const delCampo = dati.note
       .filter((n) => n.campoNome?.toLowerCase() === filtro.toLowerCase())
       .sort((a, b) => b.dataFatto.localeCompare(a.dataFatto))
+    const daFare = delCampo.filter((n) => eRaccomandazione(n) && !n.fattaIl)
+    const fatti = delCampo.filter((n) => !daFare.includes(n))
+
+    /*
+     * Le note divise per annata: la domanda vera è "cosa ho fatto qui l'anno
+     * scorso, a quest'epoca?". Un elenco unico in ordine di data la nasconde.
+     */
+    const perAnno = new Map<string, Nota[]>()
+    for (const n of fatti) {
+      const anno = n.dataFatto.slice(0, 4)
+      perAnno.set(anno, [...(perAnno.get(anno) ?? []), n])
+    }
+    const registrato = dati.elenco.find((c) => c.nome.toLowerCase() === filtro.toLowerCase())
 
     return (
       <>
-        <h2 style={{ margin: '0 0 14px' }}>{filtro}</h2>
-        {note.length === 0 ? (
+        <h2 style={{ margin: '0 0 6px' }}>{filtro}</h2>
+        {registrato?.campoId ? (
+          <Link to={`/campi/${registrato.campoId}`} className="link-testo">
+            Scheda del campo: ettari, coltura, appezzamento PAC
+          </Link>
+        ) : (
+          <Link to="/campi/nuovo" className="link-testo">
+            Registralo per bene (ettari, appezzamento PAC) per il confronto fra annate
+          </Link>
+        )}
+
+        {daFare.length > 0 && (
+          <>
+            <h2 className="titolo-sezione">📌 Da fare su questo campo ({daFare.length})</h2>
+            {daFare.map((n) => (
+              <RigaCampo key={n.id} nota={n} />
+            ))}
+          </>
+        )}
+
+        {delCampo.length === 0 ? (
           <p className="aiuto">Nessuna nota su questo campo.</p>
         ) : (
-          note.map((n) => (
-            <Link key={n.id} to={`/quaderno/${n.id}`} className="scheda scheda-cliccabile nota">
-              <div className="nota-intestazione">
-                <span className="nota-data">{fmtData(n.dataFatto)}</span>
-              </div>
-              <p className="nota-testo">{n.testo}</p>
-            </Link>
+          [...perAnno.entries()].map(([anno, note]) => (
+            <section key={anno}>
+              <h2 className="titolo-sezione">
+                {anno} · {note.length} {note.length === 1 ? 'nota' : 'note'}
+              </h2>
+              {note.map((n) => (
+                <RigaCampo key={n.id} nota={n} />
+              ))}
+            </section>
           ))
         )}
         <Link
@@ -148,5 +182,26 @@ export default function Campi({ azienda }: { azienda: Azienda }) {
         })
       )}
     </>
+  )
+}
+
+function RigaCampo({ nota }: { nota: Nota }) {
+  return (
+    <Link
+      to={`/quaderno/${nota.id}`}
+      className={`scheda scheda-cliccabile nota ${nota.fattaIl ? 'raccomandazione-fatta' : ''}`}
+    >
+      <div className="nota-intestazione">
+        <span className="nota-data">
+          {eRaccomandazione(nota) ? '📌 ' : ''}
+          {fmtData(nota.dataFatto)}
+        </span>
+        <span>
+          {nota.argomenti.map((k) => argomentoDi(k)?.icona).join(' ')}
+          {nota.fotoAllegatiId?.length ? ` 📷 ${nota.fotoAllegatiId.length}` : ''}
+        </span>
+      </div>
+      <p className="nota-testo">{nota.testo}</p>
+    </Link>
   )
 }

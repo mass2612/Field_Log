@@ -1065,3 +1065,106 @@ textarea {
   font-weight: 400;
   color: var(--testo-tenue);
 }
+
+/* ---------------------------------------------------------------------------
+ * Raccomandazioni e foto nelle note
+ * ------------------------------------------------------------------------- */
+
+/* Stesso peso di "Salva nota", colore diverso: due salvataggi, non due copie. */
+.pulsante-raccomandazione {
+  background: var(--blu);
+}
+
+.pulsante-raccomandazione:active {
+  background: var(--blu);
+  filter: brightness(1.15);
+}
+
+.fila-miniature {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.miniatura {
+  padding: 0;
+  border: 1px solid var(--bordo);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 76px;
+  height: 76px;
+  background: var(--superficie);
+  min-height: 0;
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.miniatura-con-via {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.foto-grande {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+  padding: 16px;
+}
+
+.foto-grande img {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+}
+
+.foto-grande-chiudi {
+  color: #fff;
+  font-size: 16px;
+}
+
+.schede-quaderno {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.scheda-quaderno {
+  min-height: var(--bersaglio);
+  border: 2px solid var(--bordo);
+  border-radius: var(--raggio);
+  background: var(--superficie);
+  color: var(--testo);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.scheda-quaderno.attiva {
+  border-color: var(--verde);
+  background: var(--verde-tenue);
+  color: var(--verde);
+}
+
+.scheda-quaderno.attiva.blu {
+  border-color: var(--blu);
+  background: #e7f0f9;
+  color: var(--blu);
+}
+
+.raccomandazione-fatta .nota-testo {
+  text-decoration: line-through;
+  color: var(--testo-tenue);
+}

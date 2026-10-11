@@ -1,7 +1,8 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { argomentoDi } from '../../core/domain/note'
-import { annulla, db } from '../../core/db/db'
+import { argomentoDi, eRaccomandazione } from '../../core/domain/note'
+import { annulla, db, modificaTracciata } from '../../core/db/db'
+import { FotoArchiviate } from '../../ui/foto'
 import { fmtData, fmtIstante, fmtScritta } from '../../core/i18n'
 
 /**
@@ -25,6 +26,8 @@ export default function Nota() {
 
   const modificata = nota.modificatoIl !== nota.creatoIl
   const prodotti = nota.scheda?.prodotti ?? []
+  const raccomandazione = eRaccomandazione(nota)
+  const cosa = raccomandazione ? 'raccomandazione' : 'nota'
 
   return (
     <>
@@ -43,9 +46,23 @@ export default function Nota() {
         )}
       </div>
 
+      {raccomandazione && (
+        <div className="rilievo" style={{ borderColor: 'var(--blu)' }}>
+          <strong style={{ color: 'var(--blu)' }}>
+            📌 Raccomandazione{nota.fattaIl ? ` — fatta il ${fmtIstante(nota.fattaIl)}` : ' — da fare'}
+          </strong>
+        </div>
+      )}
+
       <div className="scheda">
         <p className="nota-testo-intero">{nota.testo}</p>
       </div>
+
+      {nota.fotoAllegatiId && nota.fotoAllegatiId.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          <FotoArchiviate ids={nota.fotoAllegatiId} />
+        </div>
+      )}
 
       <div className="etichette">
         {nota.argomenti.map((chiave) => {
@@ -78,10 +95,29 @@ export default function Nota() {
       )}
 
       <div className="pila" style={{ marginTop: 18 }}>
+        {raccomandazione && (
+          <button
+            className={nota.fattaIl ? 'pulsante-secondario' : 'pulsante-principale pulsante-raccomandazione'}
+            onClick={() =>
+              void modificaTracciata(
+                db.note,
+                'note',
+                nota.id,
+                { fattaIl: nota.fattaIl ? undefined : new Date().toISOString() },
+                { aziendaId: nota.aziendaId },
+              )
+            }
+          >
+            {nota.fattaIl ? 'Rimetti fra le cose da fare' : '✓ Fatto'}
+          </button>
+        )}
         <Link to={`/quaderno/${nota.id}/modifica`} className="pulsante pulsante-principale">
           ✏️ Modifica
         </Link>
-        <Link to="/quaderno" className="pulsante pulsante-secondario">
+        <Link
+          to={raccomandazione ? '/quaderno?sezione=raccomandazioni' : '/quaderno'}
+          className="pulsante pulsante-secondario"
+        >
           Torna al quaderno
         </Link>
       </div>
@@ -100,7 +136,7 @@ export default function Nota() {
           naviga('/quaderno', { replace: true })
         }}
       >
-        Cancella questa nota
+        Cancella questa {cosa}
       </button>
       <p className="aiuto">
         Sparisce dal quaderno ma resta recuperabile: se ti accorgi dopo che serviva, si ritrova.

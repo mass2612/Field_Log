@@ -1,5 +1,6 @@
 import type { Campo, Coltura, Documento, Prodotto } from '../../core/domain/types'
-import type { Nota } from '../../core/domain/note'
+import { eRaccomandazione, type Nota } from '../../core/domain/note'
+import { controllaDose } from '../../core/rules/dose'
 
 /**
  * L'elenco per il quaderno di campagna digitale (QDCA, sul SIAN).
@@ -49,6 +50,8 @@ export interface RigaQdca {
   patentino: string
   dataControlloFunzionale: string
   mancano: string[]
+  /** Cose da guardare prima di dichiararle: la dose oltre il massimo. */
+  avvisi: string[]
 }
 
 export interface ContestoQdca {
@@ -83,6 +86,8 @@ export function righeQdca(note: Nota[], ctx: ContestoQdca): RigaQdca[] {
   const righe: RigaQdca[] = []
 
   for (const nota of vivi(note)) {
+    // Una raccomandazione dice cosa andrà fatto, non cosa è stato fatto.
+    if (eRaccomandazione(nota)) continue
     const tratta = nota.argomenti.includes('trattamento')
     const concima = nota.argomenti.includes('concimazione')
     if (!tratta && !concima) continue
@@ -124,6 +129,11 @@ export function righeQdca(note: Nota[], ctx: ContestoQdca): RigaQdca[] {
         patentino: tratta ? patentino : '',
         dataControlloFunzionale: tratta ? controllo : '',
         mancano: [],
+        avvisi: [],
+      }
+      if (anagrafica && p?.quantita != null) {
+        const esito = controllaDose(anagrafica, p.quantita, p.unitaMisura, ettari)
+        if (esito?.oltre) riga.avvisi.push(esito.messaggio)
       }
       riga.mancano = mancanti(riga, patentini.length, controlli.length)
       righe.push(riga)
@@ -184,5 +194,6 @@ export function righeQdcaPerCsv(righe: RigaQdca[]): Record<string, string | numb
     'N. patentino': r.patentino,
     'Data controllo funzionale': r.dataControlloFunzionale,
     'Dati mancanti': r.mancano.join(', '),
+    Avvisi: r.avvisi.join(' '),
   }))
 }

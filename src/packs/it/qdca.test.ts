@@ -130,6 +130,22 @@ describe('elenco per il quaderno digitale', () => {
     ).toEqual([])
   })
 
+  it('le raccomandazioni non finiscono nell’elenco', () => {
+    expect(
+      righeQdca([nota({ genere: 'raccomandazione', testo: 'devo trattare il pero' })], {
+        campi: [], colture: [], prodotti: [], documenti: [],
+      }),
+    ).toEqual([])
+  })
+
+  it('avvisa se la dose per ettaro supera il massimo', () => {
+    const [r] = righeQdca(
+      [nota({ campoNome: 'Il pero', scheda: { prodotti: [{ nome: 'Poltiglia bordolese', quantita: 12, unitaMisura: 'kg' }] } })],
+      { campi: [pero], colture: [], prodotti: [{ ...rame, doseMaxPerHa: 4 }], documenti: [] },
+    )
+    expect(r.avvisi[0]).toContain('oltre il massimo')
+  })
+
   it('con due patentini non sceglie a caso', () => {
     const [r] = righeQdca([nota({})], {
       campi: [], colture: [], prodotti: [],

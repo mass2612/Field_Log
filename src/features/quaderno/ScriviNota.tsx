@@ -3,7 +3,10 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { Allegato, Azienda, Tracciato } from '../../core/domain/types'
 import type { Nota } from '../../core/domain/note'
-import { ARGOMENTI, leggiNota, proponiArgomenti } from '../../core/domain/note'
+import { ARGOMENTI, eRaccomandazione, leggiNota, proponiArgomenti } from '../../core/domain/note'
+import { controllaDosiNota } from '../../core/rules/dose'
+import SceltaFoto from '../../ui/SceltaFoto'
+import { FotoArchiviate, Miniatura, riduciFoto } from '../../ui/foto'
 import { db, modificaTracciata, oggi, traccia } from '../../core/db/db'
 import { nomiDeiCampi } from '../../core/db/note'
 import BottoneVocale from '../../ui/BottoneVocale'
@@ -40,6 +43,8 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
     return {
       campiConosciuti: nomiDeiCampi(note, campi),
       prodottiConosciuti: prodotti.map((p) => p.nome),
+      prodotti,
+      campi,
     }
   }, [azienda.id])
 
@@ -64,6 +69,9 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
    */
   const [registrazioni, setRegistrazioni] = useState<RegistrazioneInAttesa[]>([])
   const [avvisoVoce, setAvvisoVoce] = useState<MotivoMancataTrascrizione | null>(null)
+  /** Foto scattate in questa scrittura, non ancora archiviate. */
+  const [fotoNuove, setFotoNuove] = useState<Blob[]>([])
+  const [fotoTenute, setFotoTenute] = useState<string[]>([])
 
   // In modifica il modulo si riempie una volta sola.
   useEffect(() => {
@@ -74,6 +82,7 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
     setArgomenti(esistente.argomenti)
     setArgomentiToccati(Boolean(esistente.argomentiConfermati))
     setDataToccata(true)
+    setFotoTenute(esistente.fotoAllegatiId ?? [])
     setCaricata(true)
   }, [inModifica, esistente, caricata])
 
@@ -102,7 +111,22 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
   const campoProposto = letta?.scheda.campoNome
   const prodottiLetti = letta?.scheda.prodotti ?? []
 
-  async function salva() {
+  /*
+   * La dose per ettaro, controllata mentre si scrive: chi ha messo 6 kg dove
+   * l'etichetta ne consente 4 lo deve sapere adesso, non nella dichiarazione.
+   */
+  const nomeCampoAttuale = (campoNome.trim() || campoProposto || '').toLowerCase()
+  const ettariCampo = contesto?.campi.find((c) => c.nome.toLowerCase() === nomeCampoAttuale)?.superficieHa
+  const dosiOltre = contesto
+    ? controllaDosiNota(prodottiLetti, letta?.scheda.superficieHa ?? ettariCampo, contesto.prodotti).filter(
+        (e) => e.oltre,
+      )
+    : []
+
+  /** In modifica si salva com'era nata; nuova, la sceglie il pulsante premuto. */
+  const raccomandazioneEsistente = esistente ? eRaccomandazione(esistente) : false
+
+  async function salva(raccomandazione: boolean) {
     if (!testo.trim()) return
 
     const campo = campoNome.trim() || campoProposto || undefined
@@ -129,6 +153,19 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
       audioAllegatiId.push(allegato.id)
     }
 
+    const fotoAllegatiId = [...fotoTenute]
+    for (const [indice, foto] of fotoNuove.entries()) {
+      const allegato = traccia<Omit<Allegato, keyof Tracciato>>({
+        aziendaId: azienda.id,
+        nomeFile: `foto-${dataFatto}-${indice + 1}.jpg`,
+        tipoMime: foto.type || 'image/jpeg',
+        dimensioneByte: foto.size,
+        blob: foto,
+      }) as Allegato
+      await db.allegati.add(allegato)
+      fotoAllegatiId.push(allegato.id)
+    }
+
     const dati = {
       aziendaId: azienda.id,
       testo: testo.trim(),
@@ -143,6 +180,8 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
       daVoce: registrazioni.length > 0 || daRileggere || undefined,
       audioAllegatiId: audioAllegatiId.length > 0 ? audioAllegatiId : undefined,
       trascrizioneDaRileggere: daRileggere || undefined,
+      genere: raccomandazione ? ('raccomandazione' as const) : undefined,
+      fotoAllegatiId: fotoAllegatiId.length > 0 ? fotoAllegatiId : undefined,
     }
 
     if (inModifica && notaId) {
@@ -152,7 +191,10 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
     }
 
     setSalvato(true)
-    setTimeout(() => naviga('/quaderno', { replace: true }), 400)
+    setTimeout(
+      () => naviga(raccomandazione ? '/quaderno?sezione=raccomandazioni' : '/quaderno', { replace: true }),
+      400,
+    )
   }
 
   function aggiungiTesto(nuovo: string) {
@@ -199,7 +241,7 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
           className="campo-nota"
           value={testo}
           onChange={(e) => setTesto(e.target.value)}
-          placeholder="Scrivi cosa hai fatto, oppure tieni premuto il microfono e raccontalo."
+          placeholder="Scrivi cosa hai fatto o cosa andrà fatto, oppure tieni premuto il microfono e raccontalo."
           autoFocus={!inModifica}
         />
         <div className="angolo-microfono">
@@ -227,16 +269,79 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
         </p>
       )}
 
-      {/* Un solo pulsante grande sulla schermata, ed è questo. */}
-      <div className="pila" style={{ marginTop: 18 }}>
-        <button
-          className="pulsante-principale"
-          onClick={() => void salva()}
-          disabled={!testo.trim() || salvato}
-        >
-          {salvato ? '✓ Salvata' : 'Salva'}
+      {/* Le foto: l'argine da rialzare, la foglia malata. Accessorio, quindi in piccolo. */}
+      {(fotoTenute.length > 0 || fotoNuove.length > 0) && (
+        <div className="fila-miniature" style={{ marginTop: 12 }}>
+          <FotoArchiviate ids={fotoTenute} />
+          {fotoNuove.map((f, i) => (
+            <span key={i} className="miniatura-con-via">
+              <Miniatura blob={f} alt={`Foto nuova ${i + 1}`} />
+              <button
+                type="button"
+                className="link-testo"
+                onClick={() => setFotoNuove((prima) => prima.filter((x) => x !== f))}
+              >
+                togli
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      {fotoTenute.length > 0 && (
+        <button type="button" className="link-testo" onClick={() => setFotoTenute([])}>
+          Togli le foto già salvate
         </button>
-        <button className="pulsante-secondario" onClick={() => naviga(-1)}>
+      )}
+      <div style={{ marginTop: 12 }}>
+        <SceltaFoto
+          compatta
+          onFoto={async (file) => {
+            const ridotta = await riduciFoto(file)
+            setFotoNuove((prima) => [...prima, ridotta])
+          }}
+        />
+      </div>
+
+      {dosiOltre.map((e) => (
+        <div key={e.prodotto} className="rilievo rilievo-avviso">
+          <strong>⚠️ {e.messaggio}</strong>
+          <small>Controlla quantità ed ettari: se è giusto, salva lo stesso.</small>
+        </div>
+      ))}
+
+      {/*
+        Due modi di salvare, deciso l'11/10/2026: la nota dice cosa è
+        successo, la raccomandazione cosa andrà fatto. In modifica resta uno
+        solo: la nota sa già cos'è.
+      */}
+      <div className="pila" style={{ marginTop: 8 }}>
+        {inModifica ? (
+          <button
+            className="pulsante-principale"
+            onClick={() => void salva(raccomandazioneEsistente)}
+            disabled={!testo.trim() || salvato}
+          >
+            {salvato ? '✓ Salvata' : 'Salva'}
+          </button>
+        ) : (
+          <>
+            <button
+              className="pulsante-principale"
+              onClick={() => void salva(false)}
+              disabled={!testo.trim() || salvato}
+            >
+              {salvato ? '✓ Salvata' : '📓 Salva nota'}
+            </button>
+            <button
+              className="pulsante-principale pulsante-raccomandazione"
+              onClick={() => void salva(true)}
+              disabled={!testo.trim() || salvato}
+            >
+              📌 Salva raccomandazione
+            </button>
+          </>
+        )}
+        <button type="button" className="link-testo" onClick={() => naviga(-1)}>
           Lascia stare
         </button>
       </div>

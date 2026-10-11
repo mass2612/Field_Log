@@ -16,9 +16,15 @@ import { useRef } from 'react'
 export default function SceltaFoto({
   onFoto,
   disabilitato,
+  compatta,
 }: {
   onFoto: (file: File) => void
   disabilitato?: boolean
+  /**
+   * Due pulsanti secondari invece di uno grande: nella nota la foto è un
+   * accessorio, e il pulsante grande della schermata dev'essere il salvataggio.
+   */
+  compatta?: boolean
 }) {
   const fotocamera = useRef<HTMLInputElement>(null)
   const archivio = useRef<HTMLInputElement>(null)
@@ -35,7 +41,7 @@ export default function SceltaFoto({
       <div className="azioni-pagina">
         <button
           type="button"
-          className="pulsante-principale"
+          className={compatta ? 'pulsante-secondario' : 'pulsante-principale'}
           onClick={() => fotocamera.current?.click()}
           disabled={disabilitato}
         >

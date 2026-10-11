@@ -7,6 +7,41 @@ Voce più recente in cima.
 
 ---
 
+## 11 ottobre 2026 — Raccomandazioni, foto nelle note, avviso di dose
+
+**Deciso: due pulsanti per salvare, "Salva nota" e "Salva raccomandazione".**
+Supera la regola del 27/09 ("un solo pulsante grande, Salva"), per scelta del
+committente. La nota dice **cosa è successo**; la raccomandazione **cosa andrà
+fatto**. L'esempio che l'ha fatta nascere: *"sono sull'argine, penso che va
+rialzato quando faccio i lavori: scrivo e lo fotografo"*. Colori diversi
+(verde e blu) perché siano due salvataggi, non due copie. In modifica torna
+un pulsante solo: la nota sa già cos'è.
+Nel Quaderno due sezioni in cima, **Note** e **Raccomandazioni**; queste hanno
+il pulsante **✓ Fatto**. Conseguenza importante: **una raccomandazione non
+finisce mai nel registro né nell'elenco per il SIAN**, anche se parla di
+trattare: dice cosa andrà fatto, non cosa è stato fatto.
+
+**Fatto: foto nelle note**, scattate o scelte, più d'una. Si rimpiccioliscono
+(lato lungo 1600 px) prima di archiviarle: una foto del telefono pesa 3-5 MB e
+per un argine bastano poche centinaia di KB. Le foto dei documenti invece
+restano intere, perché lì i numeri piccoli devono restare leggibili.
+
+**Fatto: avviso se la dose per ettaro supera il massimo**, mentre si scrive e
+nell'elenco per il SIAN. Converte le unità (g/kg/q/t, ml/l). Non impedisce mai
+di salvare. **Limite:** funziona solo per i prodotti con la dose massima
+inserita; il valore vero arriverà col registro ufficiale dei prodotti (B1).
+
+**Corretti due difetti trovati provando:**
+1. "Il pero" non veniva riconosciuto in "dato il rame **al** pero": l'articolo
+   cambia nella frase. Ora si confronta il nome senza articolo, a parole intere.
+2. L'avversità non si leggeva dalla frase ("per la ticchiolatura"). Ora sì,
+   da un elenco delle più comuni.
+
+**Campi:** la pagina di un campo divide le note **per anno**, con in cima le
+raccomandazioni ancora da fare. L'anno scorso si vede subito, se ci sono i dati.
+
+---
+
 ## 10 ottobre 2026 (sera) — L'elenco per il SIAN, e un buco nel registro
 
 **Verificato sul testo europeo** (Reg. di esecuzione UE 2023/564, allegato,

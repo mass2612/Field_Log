@@ -1,4 +1,4 @@
-import type { Giorno, ID, Tracciato, UnitaMisura } from './types'
+import type { Giorno, ID, Istante, Tracciato, UnitaMisura } from './types'
 
 /**
  * LA NOTA — il primitivo dell'app.
@@ -52,6 +52,25 @@ export interface Nota extends Tracciato {
 
   /** L'interpretazione strutturata, da confermare. */
   scheda?: SchedaNota
+
+  /**
+   * Nota o raccomandazione. Vuoto = nota.
+   *
+   * La nota dice **cosa è successo**; la raccomandazione dice **cosa andrà
+   * fatto** ("l'argine va rialzato quando si fanno i lavori"). La differenza
+   * pesa: una raccomandazione che parla di trattare la vigna non è un
+   * trattamento, e non deve finire nel registro né nell'elenco per il SIAN.
+   */
+  genere?: 'raccomandazione'
+  /** Per le raccomandazioni: quando è stata fatta la cosa raccomandata. */
+  fattaIl?: Istante
+
+  /** Foto scattate o scelte insieme alla nota: l'argine da rialzare, la foglia malata. */
+  fotoAllegatiId?: ID[]
+}
+
+export function eRaccomandazione(nota: Pick<Nota, 'genere'>): boolean {
+  return nota.genere === 'raccomandazione'
 }
 
 /**
@@ -309,11 +328,27 @@ function ripulisciNome(grezzo: string): string {
  * farebbe nascere dieci campi per lo stesso pezzo di terra.
  */
 export function proponiCampo(testo: string, campiConosciuti: string[]): string | undefined {
-  const t = testo.toLowerCase()
+  const t = ` ${testo.toLowerCase()} `
   const candidati = campiConosciuti
-    .filter((nome) => nome.length >= 3 && t.includes(nome.toLowerCase()))
+    .filter((nome) => {
+      // I nomi dei campi hanno quasi sempre l'articolo — "il pero", "la
+      // marcita" — e nella frase diventa "al pero", "nella marcita". Si
+      // confronta il nome senza articolo, ma a parole intere: "pero" non
+      // deve scattare dentro "però" o "operaio".
+      const nucleo = senzaArticolo(nome.toLowerCase())
+      if (nucleo.length < 3) return false
+      return new RegExp(`(^|[^\\p{L}])${escapeRegExp(nucleo)}($|[^\\p{L}])`, 'u').test(t)
+    })
     .sort((a, b) => b.length - a.length)
   return candidati[0]
+}
+
+function senzaArticolo(nome: string): string {
+  return nome.replace(/^(il|lo|la|i|gli|le|l['’])\s*/u, '').trim()
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 export function proponiSuperficie(testo: string): number | undefined {
@@ -336,8 +371,31 @@ export function leggiNota(
       campoNome: proponiCampo(testo, contesto.campiConosciuti),
       prodotti: prodotti.length > 0 ? prodotti : undefined,
       superficieHa: proponiSuperficie(testo),
+      avversita: proponiAvversita(testo),
     },
   }
+}
+
+/**
+ * Le avversità più comuni, come le dice chi lavora. Il registro le chiede per
+ * ogni trattamento; se non le si legge dalla frase, toccherebbe scriverle a
+ * mano dopo, ed è il genere di lavoro che non si fa.
+ */
+const AVVERSITA = [
+  'peronospora', 'oidio', 'mal bianco', 'botrite', 'muffa grigia', 'ticchiolatura',
+  'afidi', 'afide', 'ragnetto rosso', 'ragnetto', 'tignoletta', 'tignola', 'carpocapsa',
+  'cimice', 'mosca', 'piralide', 'diabrotica', 'septoria', 'ruggine', 'fusariosi',
+  'fusarium', 'alternaria', 'flavescenza', 'cocciniglia', 'psilla', 'monilia',
+  'bolla', 'corineo', 'black rot', 'escoriosi', 'elateridi', 'nottue', 'lumache',
+  'infestanti', 'malerbe', 'erbe infestanti',
+]
+
+export function proponiAvversita(testo: string): string | undefined {
+  const t = testo.toLowerCase()
+  const nota = AVVERSITA.filter((a) => new RegExp(`(^|[^\p{L}])${a}($|[^\p{L}])`, 'u').test(t)).sort(
+    (x, y) => y.length - x.length,
+  )[0]
+  return nota
 }
 
 function spostaGiorni(giorno: Giorno, giorni: number): Giorno {

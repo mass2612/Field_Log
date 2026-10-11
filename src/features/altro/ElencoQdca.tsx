@@ -31,6 +31,7 @@ export default function ElencoQdca({ azienda }: { azienda: Azienda }) {
   if (!righe) return null
 
   const complete = righe.filter((r) => r.mancano.length === 0).length
+  const conAvvisi = righe.filter((r) => r.avvisi.length > 0).length
   const conteggioMancanze = new Map<string, number>()
   for (const r of righe) for (const m of r.mancano) conteggioMancanze.set(m, (conteggioMancanze.get(m) ?? 0) + 1)
   const mancanzePrincipali = [...conteggioMancanze.entries()].sort((a, b) => b[1] - a[1])
@@ -63,6 +64,15 @@ export default function ElencoQdca({ azienda }: { azienda: Azienda }) {
                 {complete} su {righe.length}
               </span>
             </div>
+
+            {conAvvisi > 0 && (
+              <div className="rilievo rilievo-avviso" style={{ marginTop: 12 }}>
+                <strong>
+                  ⚠️ Dose oltre il massimo in {conAvvisi} {conAvvisi === 1 ? 'riga' : 'righe'}
+                </strong>
+                <small>Controlla prima di dichiararle: può essere un errore di scrittura.</small>
+              </div>
+            )}
 
             {mancanzePrincipali.length > 0 && (
               <>
@@ -137,6 +147,11 @@ function RigaElenco({ riga: r }: { riga: RigaQdca }) {
       )}
       {r.tipo === 'Trattamento' && dato('Avversità', r.avversita)}
       {r.tipo === 'Trattamento' && dato('N. autorizzazione', r.numeroAutorizzazione)}
+      {r.avvisi.map((a) => (
+        <p key={a} className="aiuto" style={{ color: 'var(--rosso)', fontWeight: 700, marginTop: 8 }}>
+          ⚠️ {a}
+        </p>
+      ))}
       {r.mancano.length > 0 ? (
         <p className="aiuto" style={{ color: 'var(--rosso)', marginTop: 8 }}>
           Manca: {r.mancano.join(', ')}
