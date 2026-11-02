@@ -67,10 +67,70 @@ export interface Nota extends Tracciato {
 
   /** Foto scattate o scelte insieme alla nota: l'argine da rialzare, la foglia malata. */
   fotoAllegatiId?: ID[]
+
+  /**
+   * Per le raccomandazioni: da quando ricordarla. Il primo giorno del mese
+   * indicato ("a febbraio" → 2027-02-01). Vuoto = nessun promemoria a data.
+   */
+  ricordaDal?: Giorno
 }
 
 export function eRaccomandazione(nota: Pick<Nota, 'genere'>): boolean {
   return nota.genere === 'raccomandazione'
+}
+
+const MESI = [
+  'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
+  'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre',
+]
+
+/** Le stagioni, come le dice chi lavora: si ricorda all'inizio della stagione. */
+const STAGIONI: [RegExp, number][] = [
+  [/\bprimavera\b/, 3],
+  [/\bestate\b/, 6],
+  [/\bautunno\b/, 9],
+  [/\binverno\b/, 12],
+]
+
+/**
+ * Il periodo in cui ricordare una raccomandazione, letto dalla frase:
+ * "a febbraio", "entro marzo", "in primavera", "il mese prossimo".
+ *
+ * Si sceglie sempre **la prossima volta** che arriva quel mese: a novembre
+ * "febbraio" vuol dire il febbraio che viene, non quello passato. Se il mese è
+ * quello in corso, vale adesso. Restituisce il primo giorno del mese.
+ */
+export function proponiPeriodo(testo: string, oggi: Giorno): Giorno | undefined {
+  const t = testo.toLowerCase()
+  const [anno, mese] = oggi.split('-').map(Number)
+
+  let meseScelto: number | undefined
+  if (/\bil\s+mese\s+prossimo\b|\bmese\s+prossimo\b/.test(t)) meseScelto = (mese % 12) + 1
+  else {
+    const i = MESI.findIndex((m) => new RegExp(`\\b${m}\\b`).test(t))
+    if (i >= 0) meseScelto = i + 1
+    else meseScelto = STAGIONI.find(([re]) => re.test(t))?.[1]
+  }
+  if (!meseScelto) return undefined
+
+  const annoScelto = meseScelto >= mese ? anno : anno + 1
+  return `${annoScelto}-${pad(meseScelto)}-01`
+}
+
+/** "2027-02-01" → "febbraio 2027". */
+export function nomePeriodo(giorno: Giorno): string {
+  const [anno, mese] = giorno.split('-').map(Number)
+  return `${MESI[mese - 1]} ${anno}`
+}
+
+/** I prossimi dodici mesi, a partire da questo: per scegliere a mano. */
+export function prossimiMesi(oggi: Giorno): Giorno[] {
+  const [anno, mese] = oggi.split('-').map(Number)
+  return Array.from({ length: 12 }, (_, i) => {
+    const m = ((mese - 1 + i) % 12) + 1
+    const a = anno + Math.floor((mese - 1 + i) / 12)
+    return `${a}-${pad(m)}-01`
+  })
 }
 
 /**

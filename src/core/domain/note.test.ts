@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { proponiAvversita, proponiCampo } from './note'
+import { nomePeriodo, proponiAvversita, proponiCampo, proponiPeriodo, prossimiMesi } from './note'
 
 describe('riconoscere il campo nella frase', () => {
   const campi = ['Il pero', 'La marcita', 'Vigna sotto casa']
@@ -26,5 +26,27 @@ describe('avversità dalla frase', () => {
   })
   it('non la inventa', () => {
     expect(proponiAvversita('dato il rame al pero')).toBeUndefined()
+  })
+})
+
+describe('quando ricordare una raccomandazione', () => {
+  it('a novembre, "febbraio" è il febbraio che viene', () => {
+    expect(proponiPeriodo('argine da rialzare a febbraio', '2026-11-02')).toBe('2027-02-01')
+  })
+  it('il mese in corso vale adesso', () => {
+    expect(proponiPeriodo('entro novembre', '2026-11-02')).toBe('2026-11-01')
+  })
+  it('le stagioni e il mese prossimo', () => {
+    expect(proponiPeriodo('in primavera rifare il fosso', '2026-11-02')).toBe('2027-03-01')
+    expect(proponiPeriodo('il mese prossimo', '2026-12-10')).toBe('2027-01-01')
+  })
+  it('senza un periodo non inventa niente', () => {
+    expect(proponiPeriodo('argine da rialzare quando faccio i lavori', '2026-11-02')).toBeUndefined()
+  })
+  it('i prossimi dodici mesi partono da questo', () => {
+    const m = prossimiMesi('2026-11-02')
+    expect(m[0]).toBe('2026-11-01')
+    expect(m[3]).toBe('2027-02-01')
+    expect(nomePeriodo(m[3])).toBe('febbraio 2027')
   })
 })

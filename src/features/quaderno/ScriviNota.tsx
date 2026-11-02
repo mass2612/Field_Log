@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { Allegato, Azienda, Tracciato } from '../../core/domain/types'
 import type { Nota } from '../../core/domain/note'
-import { ARGOMENTI, eRaccomandazione, leggiNota, proponiArgomenti } from '../../core/domain/note'
+import {
+  ARGOMENTI,
+  eRaccomandazione,
+  leggiNota,
+  nomePeriodo,
+  proponiArgomenti,
+  proponiPeriodo,
+  prossimiMesi,
+} from '../../core/domain/note'
+import { raccomandazioniSulCampo } from '../../core/rules/oggi'
 import { controllaDosiNota } from '../../core/rules/dose'
 import SceltaFoto from '../../ui/SceltaFoto'
 import { FotoArchiviate, Miniatura, riduciFoto } from '../../ui/foto'
@@ -45,6 +54,7 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
       prodottiConosciuti: prodotti.map((p) => p.nome),
       prodotti,
       campi,
+      note,
     }
   }, [azienda.id])
 
@@ -72,6 +82,12 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
   /** Foto scattate in questa scrittura, non ancora archiviate. */
   const [fotoNuove, setFotoNuove] = useState<Blob[]>([])
   const [fotoTenute, setFotoTenute] = useState<string[]>([])
+  /**
+   * Quando ricordare la raccomandazione: proposto dalla frase ("a febbraio"),
+   * cambiabile a mano. Vale solo se si salva come raccomandazione.
+   */
+  const [periodo, setPeriodo] = useState<string>('')
+  const [periodoToccato, setPeriodoToccato] = useState(false)
 
   // In modifica il modulo si riempie una volta sola.
   useEffect(() => {
@@ -83,6 +99,10 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
     setArgomentiToccati(Boolean(esistente.argomentiConfermati))
     setDataToccata(true)
     setFotoTenute(esistente.fotoAllegatiId ?? [])
+    if (esistente.ricordaDal) {
+      setPeriodo(esistente.ricordaDal)
+      setPeriodoToccato(true)
+    }
     setCaricata(true)
   }, [inModifica, esistente, caricata])
 
@@ -125,6 +145,19 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
 
   /** In modifica si salva com'era nata; nuova, la sceglie il pulsante premuto. */
   const raccomandazioneEsistente = esistente ? eRaccomandazione(esistente) : false
+
+  const periodoLetto = testo.trim() ? proponiPeriodo(testo, oggi()) : undefined
+  const periodoScelto = periodoToccato ? periodo : (periodoLetto ?? '')
+
+  /*
+   * Le raccomandazioni ancora aperte su questo campo: tornano utili proprio
+   * quando ci si scrive sopra. Quella che si sta modificando non conta.
+   */
+  const raccomandazioniQui = contesto
+    ? raccomandazioniSulCampo(contesto.note, campoNome.trim() || campoProposto || '').filter(
+        (n) => n.id !== notaId,
+      )
+    : []
 
   async function salva(raccomandazione: boolean) {
     if (!testo.trim()) return
@@ -181,6 +214,7 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
       audioAllegatiId: audioAllegatiId.length > 0 ? audioAllegatiId : undefined,
       trascrizioneDaRileggere: daRileggere || undefined,
       genere: raccomandazione ? ('raccomandazione' as const) : undefined,
+      ricordaDal: raccomandazione && periodoScelto ? periodoScelto : undefined,
       fotoAllegatiId: fotoAllegatiId.length > 0 ? fotoAllegatiId : undefined,
     }
 
@@ -301,6 +335,57 @@ export default function ScriviNota({ azienda }: { azienda: Azienda }) {
           }}
         />
       </div>
+
+      {raccomandazioniQui.length > 0 && (
+        <div className="rilievo" style={{ borderColor: 'var(--blu)' }}>
+          <strong style={{ color: 'var(--blu)' }}>
+            📌 Su questo campo avevi segnato:
+          </strong>
+          {raccomandazioniQui.slice(0, 3).map((r) => (
+            <Link key={r.id} to={`/quaderno/${r.id}`} className="link-testo" style={{ display: 'block' }}>
+              {r.testo.length > 90 ? `${r.testo.slice(0, 87)}…` : r.testo}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {(periodoScelto || raccomandazioneEsistente || periodoToccato) && (
+        <div className="gruppo-campo" style={{ marginTop: 12 }}>
+          <label htmlFor="ricorda-dal">📅 Se è una raccomandazione, te la ricordo a</label>
+          <select
+            id="ricorda-dal"
+            value={periodoScelto}
+            onChange={(e) => {
+              setPeriodo(e.target.value)
+              setPeriodoToccato(true)
+            }}
+          >
+            <option value="">non ricordarmela a una data</option>
+            {[...new Set([...(periodoScelto ? [periodoScelto] : []), ...prossimiMesi(oggi())])]
+              .sort()
+              .map((m) => (
+                <option key={m} value={m}>
+                  {nomePeriodo(m)}
+                </option>
+              ))}
+          </select>
+          {!periodoToccato && periodoLetto && (
+            <p className="aiuto">Letto dalla frase. Cambialo se sbaglio.</p>
+          )}
+        </div>
+      )}
+      {!periodoScelto && !periodoToccato && !raccomandazioneEsistente && testo.trim() && (
+        <button
+          type="button"
+          className="link-testo"
+          onClick={() => {
+            setPeriodoToccato(true)
+            setPeriodo(prossimiMesi(oggi())[1])
+          }}
+        >
+          📅 Ricordamela a una data
+        </button>
+      )}
 
       {dosiOltre.map((e) => (
         <div key={e.prodotto} className="rilievo rilievo-avviso">

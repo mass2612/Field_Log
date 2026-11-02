@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { argomentoDi, eRaccomandazione } from '../../core/domain/note'
+import { argomentoDi, eRaccomandazione, nomePeriodo } from '../../core/domain/note'
 import { annulla, db, modificaTracciata } from '../../core/db/db'
 import { FotoArchiviate } from '../../ui/foto'
 import { fmtData, fmtIstante, fmtScritta } from '../../core/i18n'
@@ -51,6 +51,13 @@ export default function Nota() {
           <strong style={{ color: 'var(--blu)' }}>
             📌 Raccomandazione{nota.fattaIl ? ` — fatta il ${fmtIstante(nota.fattaIl)}` : ' — da fare'}
           </strong>
+          {!nota.fattaIl && (
+            <small>
+              {nota.ricordaDal
+                ? `Te la ricordo a ${nomePeriodo(nota.ricordaDal)}.`
+                : 'Nessuna data: la ritrovi qui e quando scrivi su questo campo.'}
+            </small>
+          )}
         </div>
       )}
 

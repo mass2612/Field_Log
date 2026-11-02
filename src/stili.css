@@ -1179,3 +1179,49 @@ textarea {
   text-decoration: line-through;
   color: var(--testo-tenue);
 }
+
+/* ---------------------------------------------------------------------------
+ * La scheda "Oggi": l'assistente in tre righe
+ * ------------------------------------------------------------------------- */
+
+.oggi {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-color: var(--blu);
+}
+
+.oggi-titolo {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blu);
+  margin-bottom: 4px;
+}
+
+.oggi-riga {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 10px 0;
+  border-top: 1px solid var(--bordo);
+  color: var(--testo);
+  text-decoration: none;
+  font-size: 17px;
+  line-height: 1.35;
+  min-height: 44px;
+}
+
+.oggi-riga:first-of-type {
+  border-top: none;
+}
+
+.oggi-icona {
+  font-size: 20px;
+}
+
+.oggi-scadenza {
+  font-weight: 600;
+}

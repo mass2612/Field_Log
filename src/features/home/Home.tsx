@@ -10,6 +10,7 @@ import { differenzaGiorni } from '../../core/rules/carenza'
 import { fmtNumero } from '../../core/i18n'
 import type { MeteoGiorno } from '../../core/meteo/meteo'
 import TempoOggi from './TempoOggi'
+import Oggi from './Oggi'
 
 /**
  * La home: quattro bottoni grossi, in colonna.
@@ -59,6 +60,7 @@ export default function Home({
 
   return (
     <div className="piastrelle">
+      <Oggi azienda={azienda} avvisi={avvisi} />
       <TempoOggi azienda={azienda} meteo={meteo} />
 
       <Piastrella
@@ -70,7 +72,7 @@ export default function Home({
           stato
             ? stato.numeroNote === 0
               ? 'nessuna nota — comincia da qui'
-              : `${stato.numeroNote} note · ultima ${quando(stato.ultimaNota)}` +
+              : `${stato.numeroNote} ${stato.numeroNote === 1 ? 'nota' : 'note'} · ultima ${quando(stato.ultimaNota)}` +
                 (stato.raccomandazioniDaFare > 0
                   ? ` · 📌 ${stato.raccomandazioniDaFare} da fare`
                   : '')

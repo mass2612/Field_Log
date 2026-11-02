@@ -19,7 +19,8 @@ export function toCsv(righe: Riga[], separatore = ';'): string {
   const colonne = [...new Set(righe.flatMap((r) => Object.keys(r)))]
   const esc = (v: unknown): string => {
     if (v == null) return ''
-    const s = String(v)
+    // Decimali con la virgola: l'Excel italiano legge "2.5" come testo o come data.
+    const s = typeof v === 'number' ? String(v).replace('.', ',') : String(v)
     return /["\n\r;,\t]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
 
