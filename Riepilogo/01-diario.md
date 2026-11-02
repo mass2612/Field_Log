@@ -7,6 +7,46 @@ Voce più recente in cima.
 
 ---
 
+## 2 novembre 2026 — L'app diventa un assistente: la scheda "Oggi"
+
+**Deciso: l'app diventa un assistente personale, senza consulenza.** Parla
+solo di tre cose: i dati dell'agricoltore, i fatti (scadenze, meteo, regole)
+e quello che si è promesso di fare. Mai cosa fare in campo: niente
+consulenza, deciso da Max il 25/10.
+
+**Fatto: la scheda "Oggi"** in cima alla home. Al massimo tre righe, e se non
+c'è niente da dire non compare. In ordine: le raccomandazioni il cui momento
+è arrivato; la scadenza più urgente; "un anno fa", la nota dell'anno scorso
+più vicina a questa data (entro una settimana). Regole in
+`core/rules/oggi.ts`, con test.
+
+**Fatto: le raccomandazioni con un periodo.** Max: *"se indico febbraio, a
+febbraio mi deve arrivare una notifica"*. L'app legge il periodo dalla frase
+("a febbraio", "in primavera", "il mese prossimo"; sempre il prossimo che
+arriva) e lo fa cambiare a mano. Da quel mese la raccomandazione compare in
+"Oggi".
+
+**Fatto: le raccomandazioni tornano quando servono.** Scrivendo una nota su un
+campo, l'app mostra quelle ancora aperte su quel campo ("Su questo campo
+avevi segnato: argine da rialzare").
+
+**Non fatto, e perché: la notifica che arriva ad app chiusa.** Un'app web non
+può programmarsi una notifica da sola per febbraio. Le strade sono due:
+(1) un piccolo **server di notifiche** (Web Push) che a febbraio manda
+l'avviso: funziona su Android; su iPhone solo con l'app aggiunta alla
+schermata Home; (2) **l'app nativa**, che le notifiche programmate le fa da
+sola, senza server. Il dato (`ricordaDal`) è già salvato: quando c'è una
+delle due, le notifiche partono da lì senza toccare altro. Vedi T6.
+
+**Corretti:** i decimali nel CSV escono con la virgola (l'Excel italiano
+leggeva "2.5" come testo); "1 nota" invece di "1 note".
+
+**Messo al sicuro:** il lavoro del 17/10 sulla lettura col servizio è salvato
+e portato su master; `from_pic_to_data` è sotto git in locale. Il deposito
+privato su GitHub va creato a mano: alla sessione il permesso è stato negato.
+
+---
+
 ## 25 ottobre 2026 — L'incontro con Confagricoltura, e la telefonata a Image Line
 
 **L'incontro col direttore è stato un successo.** Ha visto la demo (l'app

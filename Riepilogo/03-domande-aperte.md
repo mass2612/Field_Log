@@ -190,6 +190,15 @@ attiva**: due prodotti commerciali diversi con la stessa sostanza andrebbero
 sommati. Oggi l'app conta per prodotto. **[da verificare]** — se è così, va
 cambiato il conteggio dei controlli.
 
+### T6 — Notifiche ad app chiusa (02/11/2026)
+
+Richieste da Max: la raccomandazione "a febbraio" deve arrivare come notifica
+a febbraio; lo stesso per le scadenze (patentino, revisione del trattore).
+Un'app web non sa programmarsi una notifica da sola. Due strade:
+**server di notifiche (Web Push)**, che serve comunque prima o poi (Max
+prenderà un server), oppure **app nativa**, che le fa senza server. Da
+decidere quale prima. Il dato `ricordaDal` è già nelle note.
+
 ### T5 — Annata agraria configurabile
 
 Oggi l'annata è l'anno solare. Per molte colture non è vero.
