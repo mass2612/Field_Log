@@ -5,8 +5,12 @@ import { fiduciaComplessiva, type RisultatoLettura, type Scheda } from './tipi'
 
 import type { CampoLetto } from '../domain/types'
 import { riconosciGenere } from './estrazione'
+import { ErroreLettura, leggiColServizio, letturaSulServer, type DatiContesto } from './servizio'
 
 export * from './tipi'
+export { configurazioneServizio, impostaServizio, letturaSulServer, provaServizio } from './servizio'
+export type { ConfigurazioneServizio } from './servizio'
+export type { DatiContesto } from './servizio'
 export { estraiFattura, estraiScadenza, riconosciGenere } from './estrazione'
 
 export type GenereDocumento = 'fattura' | 'scadenza'
@@ -56,13 +60,30 @@ export interface EsitoOcr {
   fiducia: number
   /** Vero quando conviene che l'utente controlli riga per riga. */
   daControllare: boolean
+  /**
+   * Tutti i campi letti, da archiviare: dal servizio arrivano più campi di
+   * quelli della scheda (destinatario, IBAN, periodo…). Assente con Tesseract.
+   */
+  campi?: CampoLetto[]
+  /** Quello che il servizio ha controllato: "Imponibile + IVA = totale", "manca una riga"… */
+  controlli?: { esito: 'ok' | 'attenzione' | 'errore'; messaggio: string }[]
+  /** Se il servizio non ha potuto leggere ed è subentrato Tesseract, il perché. */
+  avviso?: string
+}
+
+export interface OpzioniLettura {
+  oggi: Giorno
+  onProgresso?: (frazione: number) => void
+  /** Quello che l'app sa e aiuta a leggere: l'azienda, i prodotti in magazzino. */
+  contesto?: DatiContesto
 }
 
 /**
  * Fotografia → scheda.
  *
- * Un passaggio solo per chi la usa; sotto sono tre: si raddrizza l'immagine, si
- * legge il testo, si ricavano i campi.
+ * Se il servizio di lettura è configurato si legge lì (vedi `servizio.ts`);
+ * se non risponde — in campo la rete manca spesso — si legge sul telefono con
+ * Tesseract, come prima. La scheda si riempie comunque.
  *
  * Il risultato dice sempre **quanto si è capito**. Una scheda che non dichiara
  * la propria incertezza è peggio di nessuna scheda: nessuno la controlla, e
@@ -72,7 +93,48 @@ export async function leggiDocumento(
   immagine: Blob,
   /** `'auto'` lascia decidere all'app leggendo il testo: quasi sempre è meglio. */
   genere: GenereDocumento | 'auto',
-  opzioni: { oggi: Giorno; onProgresso?: (frazione: number) => void } = { oggi: '' },
+  opzioni: OpzioniLettura = { oggi: '' },
+): Promise<EsitoOcr> {
+  if (!letturaSulServer()) return leggiDocumentoLocale(immagine, genere, opzioni)
+
+  try {
+    const esito = await leggiColServizio(immagine, opzioni)
+    return { ...esito, controlli: esito.documento.controlli }
+  } catch (e) {
+    console.warn('[lettura] servizio non disponibile, leggo sul telefono:', e)
+    const locale = await leggiDocumentoLocale(immagine, genere, opzioni)
+    return {
+      ...locale,
+      avviso: `Letta qui sul telefono, con meno precisione, perché ${motivoInParole(e)}. Controlla bene i campi.`,
+    }
+  }
+}
+
+/**
+ * Il perché, detto da persona. Solo quello che si sa davvero: un messaggio
+ * che indovina la causa è peggio di nessun messaggio (diario, 26/09).
+ */
+function motivoInParole(e: unknown): string {
+  if (!(e instanceof ErroreLettura)) return 'il servizio di lettura ha avuto un problema'
+  switch (e.codice) {
+    case 'rete':
+      return 'il servizio di lettura non è raggiungibile'
+    case 'accesso':
+      return 'il servizio di lettura non accetta il gettone o non è configurato'
+    case 'limite':
+      return 'il servizio di lettura è occupato'
+    case 'file':
+      return 'il servizio di lettura non ha accettato la foto'
+    default:
+      return 'il servizio di lettura ha avuto un problema'
+  }
+}
+
+/** La lettura sul telefono, con Tesseract: niente rete, niente server, più errori. */
+export async function leggiDocumentoLocale(
+  immagine: Blob,
+  genere: GenereDocumento | 'auto',
+  opzioni: OpzioniLettura = { oggi: '' },
 ): Promise<EsitoOcr> {
   const lettore = creaLettoreLocale('ita')
 

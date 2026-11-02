@@ -14,6 +14,7 @@ import {
   campiDellaScheda,
   interpretaTesto,
   leggiDocumento,
+  letturaSulServer,
   type CampoEstratto,
   type EsitoOcr,
   type GenereDocumento,
@@ -30,9 +31,11 @@ import { serveAllaLegge } from '../../packs/it/documenti'
  * Stesso gesto della nota vocale: tu butti dentro, la macchina struttura, tu
  * correggi se ha capito male.
  *
- * La lettura avviene **sul telefono**, non su un server: niente costo per foto e
- * nessun documento che esce dall'azienda. In cambio sbaglia più di un servizio
- * a pagamento — e per questo ogni campo dice quanto se ne fida e da quale riga
+ * Se il servizio di lettura è configurato la foto si legge lì (vedi
+ * `core/ocr/servizio.ts`): legge molto meglio e controlla i conti, ma **la foto
+ * esce dal telefono**, e la schermata lo dice. Senza servizio, o senza rete, si
+ * legge sul telefono con Tesseract: niente costo, niente server, più errori.
+ * In tutti e due i casi ogni campo dice quanto se ne fida e da quale riga
  * l'ha preso, e resta correggibile.
  */
 
@@ -272,6 +275,19 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
   const [progresso, setProgresso] = useState(0)
   const [erroreLettura, setErroreLettura] = useState<string | null>(null)
 
+  /*
+   * Quello che l'app sa già, detto al servizio di lettura: chi è l'azienda (per
+   * non scambiarla col fornitore) e i prodotti in magazzino (per riconoscerne
+   * i nomi anche storpiati sulla fattura). Nessuna taratura sui fornitori.
+   */
+  const prodottiNoti = useLiveQuery(
+    async () =>
+      (await db.prodotti.where('aziendaId').equals(azienda.id).toArray())
+        .filter((p) => !p.annullatoIl)
+        .map((p) => p.nome),
+    [azienda.id],
+  )
+
   const definizione = TIPI.find((x) => x.valore === tipo)!
   /*
    * Il tipo scelto nel menù **non** decide più come si legge il documento: lo
@@ -293,6 +309,10 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
       const esito = await leggiDocumento(file, 'auto', {
         oggi: oggi(),
         onProgresso: setProgresso,
+        contesto: {
+          azienda: { nome: azienda.nome, partitaIva: azienda.partitaIva },
+          prodottiNoti: prodottiNoti ?? [],
+        },
       })
       setLettura(esito)
 
@@ -350,7 +370,7 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
         allegatoId,
         // Si archivia tutto quello che è stato letto, col testo grezzo: così
         // la scheda resta correggibile e rileggibile anche fra sei mesi.
-        campiLetti: lettura ? campiDellaScheda(lettura.scheda) : undefined,
+        campiLetti: lettura ? (lettura.campi ?? campiDellaScheda(lettura.scheda)) : undefined,
         testoLetto: lettura?.lettura.testoGrezzo,
         fiduciaLettura: lettura?.fiducia,
         genereLettura: lettura?.scheda.tipo,
@@ -374,8 +394,13 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
         />
         <p className="aiuto">
           {foto
-            ? `${foto.name} — la foto resta sul telefono`
-            : 'La foto resta sul telefono: viene letta qui, non su un server.'}
+            ? `${foto.name} — ` +
+              (letturaSulServer()
+                ? 'letta dal servizio di lettura; l’originale resta sul telefono'
+                : 'la foto resta sul telefono')
+            : letturaSulServer()
+              ? 'Per leggerla, la foto viene mandata al servizio di lettura. Senza rete si legge qui sul telefono, con meno precisione.'
+              : 'La foto resta sul telefono: viene letta qui, non su un server.'}
         </p>
       </div>
 
@@ -386,8 +411,9 @@ function NuovoDocumento({ azienda, onFatto }: { azienda: Azienda; onFatto: () =>
             <div style={{ width: `${Math.round(progresso * 100)}%` }} />
           </div>
           <p className="aiuto">
-            La prima volta scarica la lingua italiana e ci mette un po’. Dalla seconda è più
-            veloce, e funziona anche senza rete.
+            {letturaSulServer()
+              ? 'Di solito ci vogliono da 15 a 40 secondi.'
+              : 'La prima volta scarica la lingua italiana e ci mette un po’. Dalla seconda è più veloce, e funziona anche senza rete.'}
           </p>
         </div>
       )}
@@ -500,6 +526,25 @@ function EsitoLettura({ esito }: { esito: EsitoOcr }) {
           {Math.round(esito.fiducia * 100)}% · {(esito.lettura.durataMs / 1000).toFixed(1)}s
         </div>
       </div>
+
+      {esito.avviso && <p className="aiuto">⚠️ {esito.avviso}</p>}
+
+      {/*
+       * I controlli del servizio: prima quello che non torna, poi le conferme.
+       * "Le righe non fanno l'imponibile: forse manca una riga" dice dove
+       * guardare meglio di qualunque percentuale.
+       */}
+      {esito.controlli && esito.controlli.length > 0 && (
+        <ul className="elenco-controlli">
+          {[...esito.controlli]
+            .sort((a, b) => (a.esito === 'ok' ? 1 : 0) - (b.esito === 'ok' ? 1 : 0))
+            .map((c, i) => (
+              <li key={i}>
+                {c.esito === 'ok' ? '✅' : c.esito === 'errore' ? '❌' : '⚠️'} {c.messaggio}
+              </li>
+            ))}
+        </ul>
+      )}
 
       {trovati.length === 0 ? (
         <p className="aiuto">

@@ -12,6 +12,7 @@ import { LINGUE, getLingua, impostaLingua, t, type Lingua } from '../../core/i18
 import { caricaDatiDimostrativi } from '../../core/db/dimostrativo'
 import { contaRighe, eliminaDatiDimostrativi, svuotaTutto } from '../../core/db/pulizia'
 import UltimaDettatura from './UltimaDettatura'
+import { configurazioneServizio, impostaServizio, provaServizio } from '../../core/ocr'
 
 export default function Impostazioni({ azienda }: { azienda: Azienda }) {
   const [nome, setNome] = useState(azienda.nome)
@@ -227,6 +228,8 @@ export default function Impostazioni({ azienda }: { azienda: Azienda }) {
         </div>
       </div>
 
+      <ServizioLettura />
+
       <h2 className="titolo-sezione">Prova</h2>
       <Link to="/prova-lettura" className="scheda scheda-cliccabile">
         <strong style={{ fontSize: 18 }}>🔬 Banco di prova della lettura</strong>
@@ -252,6 +255,70 @@ export default function Impostazioni({ azienda }: { azienda: Azienda }) {
       {messaggio && <p className="aiuto" style={{ color: 'var(--verde)' }}>{messaggio}</p>}
 
       <FarePiazzaPulita onEsporta={() => void esportaTutto()} />
+    </>
+  )
+}
+
+/**
+ * Dove si leggono le foto dei documenti.
+ *
+ * Con un indirizzo, le foto vanno al servizio di lettura: legge molto meglio e
+ * controlla i conti, ma la foto esce dal telefono. Senza, si legge qui con
+ * Tesseract. Sta nelle impostazioni e non dentro l'app perché l'app pubblicata
+ * non deve portarsi dietro né l'indirizzo né il gettone.
+ */
+function ServizioLettura() {
+  const iniziale = configurazioneServizio()
+  const [indirizzo, setIndirizzo] = useState(iniziale.indirizzo)
+  const [gettone, setGettone] = useState(iniziale.gettone)
+  const [esito, setEsito] = useState<string | null>(null)
+  const [inProva, setInProva] = useState(false)
+
+  async function salvaEProva() {
+    impostaServizio({ indirizzo, gettone })
+    setInProva(true)
+    setEsito(await provaServizio())
+    setInProva(false)
+  }
+
+  return (
+    <>
+      <h2 className="titolo-sezione">Lettura dei documenti</h2>
+      <div className="scheda">
+        <div className="gruppo-campo">
+          <label htmlFor="sl-indirizzo">Indirizzo del servizio</label>
+          <input
+            id="sl-indirizzo"
+            type="url"
+            inputMode="url"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="vuoto: si legge sul telefono"
+            value={indirizzo}
+            onChange={(e) => setIndirizzo(e.target.value)}
+          />
+        </div>
+        <div className="gruppo-campo">
+          <label htmlFor="sl-gettone">Gettone di accesso</label>
+          <input
+            id="sl-gettone"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            value={gettone}
+            onChange={(e) => setGettone(e.target.value)}
+          />
+        </div>
+        <button className="pulsante-secondario" disabled={inProva} onClick={() => void salvaEProva()}>
+          {inProva ? 'Provo…' : 'Salva e prova il collegamento'}
+        </button>
+        {esito && <p className="aiuto">{esito}</p>}
+        <p className="aiuto">
+          Col servizio la foto viene mandata al server per essere letta. Senza indirizzo, o senza rete,
+          si legge qui sul telefono, con meno precisione.
+        </p>
+      </div>
     </>
   )
 }
