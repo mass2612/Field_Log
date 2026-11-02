@@ -21,6 +21,10 @@ menù decideva il lettore) sono chiuse: vedi il diario del 27/09 pomeriggio.
 3. **il server**, se i primi due non bastano: e lì si fa un conto solo, quanto
    costa a foto contro quanto tempo fa risparmiare.
 
+**17/10/2026: preso il punto 3** (vedi diario). Resta aperto il conto: quanto
+costa davvero a foto, misurato sulle fatture vere dell'azienda col banco di
+prova di from_pic_to_data, e chi lo paga nel prodotto venduto.
+
 ---
 
 ## Bloccanti
@@ -39,6 +43,17 @@ Nel frattempo l'app funziona con prodotti inseriti a mano, marcati `fonte:
 'manuale'` e segnalati come non verificati.
 
 ### B0 — Dal 1° gennaio 2027 il quaderno digitale è obbligatorio (SIAN)
+
+> **Aggiornamento 25/10/2026, dopo l'incontro con Confagricoltura.** La strada
+> cambia: Confagricoltura non usa i servizi AGEA, inserisce tutto su **QdC**
+> (Image Line), e al SIAN ci pensa Image Line. Il nostro punto di consegna è
+> **un file che QdC sappia importare**, mandato dall'agricoltore alla sua
+> associazione. L'accordo con un CAA per i servizi AGEA non serve più per
+> partire. Restano aperte tre cose: **il tracciato di import di QdC** (prova
+> gratuita da fare, tecnico Image Line da sentire); **se un'app non certificata
+> valga come fonte del registro** (domanda per il direttore); **come QdC
+> identifica l'appezzamento** (catasto o domanda PAC: decide cosa chiedere
+> nell'aggancio del campo). Il testo sotto resta valido come contesto.
 
 Emerso il 04/10/2026. Il Reg. UE 2023/564 impone il registro dei trattamenti
 in formato elettronico; l'Italia lo realizza col **Quaderno di Campagna

@@ -7,6 +7,105 @@ Voce più recente in cima.
 
 ---
 
+## 25 ottobre 2026 — L'incontro con Confagricoltura, e la telefonata a Image Line
+
+**L'incontro col direttore è stato un successo.** Ha visto la demo (l'app
+compila da sola ed esporta in Excel) e **vuole darla a tutti i suoi associati**.
+
+**Come lavorano oggi, raccontato da lui:** disegna a mano una tabella e la
+fotocopia; l'agricoltore la compila a mano e la manda in foto su WhatsApp;
+Confagricoltura lo richiama per correggere gli errori; poi un addetto legge,
+a volte a fatica, la scrittura del cliente e **inserisce le voci una a una su
+QdC** (Quaderno di Campagna di Image Line) con le proprie credenziali. Sua
+frase: *se ricevessero un CSV o un Excel già pronto, sarebbe un bel passo
+avanti.*
+
+**Cosa cambia rispetto a quello che pensavamo:**
+- Confagricoltura **non usa i servizi AGEA**: inserisce solo su QdC, e i dati
+  al SIAN li manda Image Line. Il nostro punto di consegna è **QdC**, non il
+  SIAN. Per partire non serve nessuna certificazione SIAN.
+- **Deciso: l'app è "note di campo", non il registro ufficiale**, e non fa
+  concorrenza a QdC: gli è complementare. Le note accettano i trattamenti per
+  due ragioni: l'analisi di fine anno (cosa rifare l'anno dopo) e l'export
+  verso chi tiene il registro vero. All'agricoltore resta la sua copia.
+- **Strategia:** restare piccoli anche crescendo, togliere sassolini, niente
+  consulenza agli utenti. Sono le associazioni di categoria a spingere
+  l'adozione. La visione più grande (PAC, gasolio, borsa merci) resta fuori
+  finché l'app non è pubblicata e funzionante: **non se ne parla con nessuno.**
+
+**Image Line:** telefonata fatta. Lo farà richiamare un tecnico del software;
+dicono che stavano già pensando a qualcosa di simile per snellire il lavoro.
+Max ha presentato l'app come complementare, con l'esempio di Confagricoltura.
+Non ha parlato di dettatura né di lettura delle foto. **Rischio da tenere
+presente:** potrebbero farsene una loro. L'export Excel funziona comunque,
+anche senza di loro.
+
+**Richieste nuove di Max:** export e analisi delle lavorazioni; avvisi di
+scadenza (patentino, revisione del trattore) che arrivino anche ad app chiusa;
+collegare il nome del campo ("il Pero") al riferimento ufficiale della
+parcella; meteo di oggi, domani e dopodomani.
+
+Il resoconto completo della conversazione in chat (23-25/10) è in
+`05-incontro-confagricoltura.md`, sezione Risposte.
+
+---
+
+## 17 ottobre 2026 — La lettura dei documenti passa a un servizio (C3)
+
+**Deciso: la foto la legge un modello sul nostro server, non più solo
+Tesseract sul telefono.** È il terzo passo previsto da C3 ("il server, se i
+primi due non bastano"). Tesseract più le regole leggeva lettera per lettera e
+poi tirava a indovinare quale numero fosse la quantità e quale il prezzo. Il
+servizio nuovo sta in un progetto a parte, **from_pic_to_data**
+(`GREPPI/from_pic_to_data`), pensato per essere usato anche da altre app: qui è
+il primo cliente.
+
+**Perché ci si può fidare, e non è "l'IA dice":** ogni dato passa da controlli
+che non dipendono dal modello. Partita IVA, codice fiscale e IBAN hanno la cifra
+di controllo; quantità per prezzo fa l'importo, le righe fanno l'imponibile,
+imponibile più IVA fa il totale. Se non torna, dice dove guardare (*"mancano 25
+€: forse una riga non è stata letta"*). Ogni campo porta ancora la riga da cui
+viene e quanto se ne fida: la scheda di Field_Log non cambia.
+
+**Provato su foto vere — lette con le stesse istruzioni del servizio, ma in
+chat, non ancora col servizio acceso — e letto tutto giusto:** una bolletta dell'acqua storta e
+in ombra, una bolletta della luce con sei date diverse (data, periodo,
+scadenza del pagamento, fine dell'offerta, bonus sociale: nessuna presa per
+"scade il" — il tranello del 27/09). Sulla prima i controlli davano un **falso
+allarme**: nelle bollette una parte è fuori campo IVA e "imponibile + IVA =
+totale" non vale. Corretto: ora riconosce "voci + IVA = totale".
+
+**Cosa cambia per l'agricoltore: la foto esce dal telefono.** La schermata dei
+documenti adesso lo dice. Senza rete si legge ancora sul telefono con
+Tesseract, e la scheda avvisa che è una lettura di ripiego. Mai bloccare
+l'inserimento.
+
+**Contesto senza taratura:** al servizio si dicono nome e partita IVA
+dell'azienda (per non scambiarla col fornitore) e i nomi dei prodotti in
+magazzino (per riconoscerli anche storpiati). Niente moduli per fornitore,
+come deciso il 10/10.
+
+**Dove gira:** su una VPS tutta sua, separata da quella di LW: il servizio
+accetta file da internet, e non deve stare sulla stessa macchina di progetti
+con segreti di valore. Per le prove gira sul PC, raggiungibile dal telefono con
+un tunnel https (`npm run telefono` in from_pic_to_data).
+
+**Deciso: l'indirizzo del servizio sta nelle Impostazioni, non dentro l'app.**
+*Impostazioni → Lettura dei documenti*: indirizzo, gettone, e un pulsante che
+prova il collegamento e dice in parole cosa non va (gettone sbagliato, servizio
+spento). Così l'app pubblicata su GitHub Pages non si porta dietro né
+l'indirizzo né il gettone, e la stessa app si punta al PC durante le prove e
+alla VPS dopo, senza ricostruirla. Senza indirizzo, l'app è quella di prima.
+
+**Da sapere prima di vendere:**
+- ogni lettura costa, stima 10-25 centesimi a documento: da misurare col banco
+  di prova di from_pic_to_data, che conta i token veri;
+- il gettone sta sul telefono di chi usa l'app: ferma i curiosi, ma chiunque
+  ce l'abbia può far leggere a nostre spese. Servono account per utente (B2);
+- il sottodominio del servizio va scelto col nome del prodotto.
+
+---
+
 ## 11 ottobre 2026 — Raccomandazioni, foto nelle note, avviso di dose
 
 **Deciso: due pulsanti per salvare, "Salva nota" e "Salva raccomandazione".**

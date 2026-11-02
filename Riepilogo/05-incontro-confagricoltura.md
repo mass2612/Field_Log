@@ -50,4 +50,78 @@ decisioni che ne nascono.
 
 ## Risposte
 
-*(da compilare dopo l'incontro)*
+Incontro avvenuto. Riassunto della conversazione in chat del 23-25/10/2026,
+diviso fra quello che ha detto Max, quello trovato online e i suggerimenti di
+Claude (che non sono decisioni).
+
+### Dichiarato da Max
+
+**Il prodotto.** "Note per l'agricoltore sul campo": non è un registro
+elettronico ufficiale, non sostituisce QdC e non vuole fargli concorrenza. Le
+note accettano i trattamenti per esportarli per l'analisi di fine anno e verso
+chi pubblica il registro vero; all'agricoltore resta una copia. C'è anche un
+magazzino non ufficiale. Da aggiungere: export e analisi delle lavorazioni;
+avvisi di scadenza (patentino, revisione del trattore); il nome del campo
+collegato alla parcella catastale; meteo di oggi, domani e dopodomani.
+
+**La strategia.** Restare piccoli anche crescendo; togliere sassolini,
+burocratici e non; niente consulenza. Le associazioni di categoria spingono
+l'adozione. La visione futura (PAC, gasolio, borsa merci) per ora non esiste e
+non se ne parla con nessuno: la priorità è pubblicare l'app funzionante. Max
+considera QdC un gigante coi piedi d'argilla; Claude è scettico, perché il
+loro vantaggio sono banca dati, clienti e canale dei consulenti.
+
+**Confagricoltura.** Oggi: tabella disegnata a mano e fotocopiata, compilata
+dall'agricoltore, rimandata in foto su WhatsApp, errori corretti per telefono,
+ribattuta a mano su QdC voce per voce. Il direttore è entusiasta, si è offerto
+di dare l'app a tutti gli associati, ed è lui ad aver indicato QdC.
+Confagricoltura inserisce solo su QdC; l'invio al SIAN lo fa Image Line.
+
+**Image Line.** Telefonata fatta: richiamerà un tecnico del software. Stavano
+già pensando a qualcosa di simile. Max può richiamare se non si fanno sentire.
+Non si è parlato di dettatura né di lettura delle foto.
+
+### Trovato online (con limiti)
+
+- Registro dei trattamenti obbligatorio; carta valida fino al 31/12/2026; dal
+  1/1/2027 elettronico (Reg. UE 2023/564, deroga 2025/2203); annotazioni su
+  carta da convertire entro 30 giorni.
+- **Precisazione di Claude Code:** il resoconto della chat dava come minimo UE
+  "data, prodotto, dose, coltura, avversità". Il testo del regolamento (letto
+  il 10/10) chiede anche **numero di autorizzazione, ettari e identificazione
+  dell'area** con l'unità della domanda PAC; l'**avversità** la chiede AGEA, non
+  il regolamento europeo.
+- QdC (solo la home letta): trattamenti e concimazioni, magazzino, meteo,
+  banche dati Fitogest/Fertilgest, versione per consulenti e associazioni,
+  290.000 clienti dichiarati. Prezzi e prova gratuita di 15 giorni non visti.
+- Prodotti: banca dati del Ministero della Salute (circa 16.500 prodotti,
+  scaricabile, aggiornamento settimanale) e banca dati MASAF/CREA con impieghi
+  ed etichette. Non verificato se le dosi siano dati strutturati.
+- SIAN: QDCA ufficiale volontario dal 2024 (applicazione "quadcamp", SPID);
+  vecchio portale in dismissione verso il Portale Unico; un documento della
+  Regione Piemonte diceva che non c'era interoperabilità con software
+  commerciali.
+
+### Suggerimenti di Claude in chat (non decisioni)
+
+- Il punto di consegna è QdC: per partire non serve certificazione SIAN.
+- Prima della chiamata col tecnico: fare la prova gratuita di QdC, preparare un
+  export di esempio con dati finti, chiedere tracciato di import, eventuale
+  API o programma partner, e a chi mandare i file di prova. Raccontare cosa fa
+  l'export, non la visione. Non decidere subito su proposte di esclusiva.
+- Chiedere al direttore se un'app non certificata vale come fonte del
+  registro; nel frattempo in app l'avviso "non sostituisce il registro
+  ufficiale".
+- I dati restano dell'agricoltore, che li manda lui all'associazione (pulsante
+  "invia a Confagricoltura"): niente problemi di consenso né di assistenza.
+- CSV: separatore `;`, UTF-8 con BOM, decimali con la virgola, da confermare
+  con Image Line.
+- L'app deve spiegarsi da sola: ogni azione in non più di due tocchi.
+
+### Ancora aperto
+
+- La richiamata del tecnico Image Line.
+- La prova gratuita di QdC: import da Excel/CSV, campi della maschera.
+- La domanda al direttore sulla validità di un'app non certificata come fonte
+  del registro.
+- La scadenza del 1/1/2027.
