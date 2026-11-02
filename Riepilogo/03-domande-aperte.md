@@ -190,14 +190,28 @@ attiva**: due prodotti commerciali diversi con la stessa sostanza andrebbero
 sommati. Oggi l'app conta per prodotto. **[da verificare]** — se è così, va
 cambiato il conteggio dei controlli.
 
-### T6 — Notifiche ad app chiusa (02/11/2026)
+### T6 — Notifiche ad app chiusa (02/11/2026) — DECISO
 
 Richieste da Max: la raccomandazione "a febbraio" deve arrivare come notifica
-a febbraio; lo stesso per le scadenze (patentino, revisione del trattore).
-Un'app web non sa programmarsi una notifica da sola. Due strade:
-**server di notifiche (Web Push)**, che serve comunque prima o poi (Max
-prenderà un server), oppure **app nativa**, che le fa senza server. Da
-decidere quale prima. Il dato `ricordaDal` è già nelle note.
+a febbraio; lo stesso per le scadenze. Un'app web non sa programmarsi una
+notifica da sola. **Deciso (02/11 sera):** l'app va sugli store, quindi le
+notifiche programmate le fa l'app nativa (involucro Capacitor sullo stesso
+codice, notifiche locali), senza server. Il dato `ricordaDal` è già nelle note.
+
+### B4 — Account, copia dei dati e pubblicità (02/11/2026)
+
+Deciso da Max: account con accesso anche via Google; freemium con pubblicità
+mirata nella versione gratuita. Da sciogliere:
+- **dove stanno i dati**: oggi solo sul telefono. Con l'account serve un
+  server che ne tenga una copia (proposta: Supabase o Firebase, accesso Google
+  già pronto, server in UE);
+- **pubblicità mirata e GDPR**: mirare la pubblicità sui dati del quaderno
+  (colture, prodotti usati) è profilazione: serve consenso esplicito e
+  separato, revocabile. E con Confagricoltura che distribuisce l'app ai suoi
+  soci, "i tuoi trattamenti usati per venderti pubblicità" è il rischio di
+  fiducia più grosso. Proposta: pubblicità per zona e coltura dichiarata,
+  mai dai contenuti delle note senza consenso; niente pubblicità a chi arriva
+  tramite associazione.
 
 ### T5 — Annata agraria configurabile
 

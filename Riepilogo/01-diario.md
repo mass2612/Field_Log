@@ -7,6 +7,33 @@ Voce più recente in cima.
 
 ---
 
+## 2 novembre 2026, sera — Il magazzino si scarica dalle note; account e store
+
+**Fatto: il magazzino legge le note.** "Dato 2,5 kg di rame" toglie 2,5 kg
+dal rame. Non si salva nessun movimento: lo scarico si **calcola** ogni volta
+dalle note (`core/rules/usoDalleNote.ts`), così correggere o annullare una
+nota corregge anche il magazzino. Non contano le raccomandazioni. I prodotti
+nominati nelle note ma assenti dal magazzino compaiono in un riquadro con
+"Aggiungi"; le quantità in un'unità che non si converte (litri su un prodotto
+in kg) non si scalano e si segnalano. Giacenza negativa = "manca un carico".
+
+**Scartato: la domanda della sera** ("cos'hai fatto oggi?"). Max: rischia di
+essere invasiva. L'assistente parla quando ha qualcosa da dire, non per
+chiedere.
+
+**Deciso da Max:**
+- l'app **andrà sugli store** (App Store e Google Play), comunque;
+- **freemium**, con la versione gratuita che potrà mostrare **pubblicità
+  mirata**;
+- serve la **registrazione di un account**, anche con Google, per ridare i dati
+  al cliente che paga (e per cambiare telefono senza perdere niente).
+
+Conseguenza su T6: con l'app sugli store, le notifiche programmate
+(raccomandazione "a febbraio") le fa l'app da sola, senza server. Il server
+serve lo stesso, ma per account e copia dei dati. Vedi B4.
+
+---
+
 ## 2 novembre 2026 — L'app diventa un assistente: la scheda "Oggi"
 
 **Deciso: l'app diventa un assistente personale, senza consulenza.** Parla
