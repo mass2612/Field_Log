@@ -12,6 +12,7 @@ import { LINGUE, getLingua, impostaLingua, t, type Lingua } from '../../core/i18
 import { caricaDatiDimostrativi } from '../../core/db/dimostrativo'
 import { contaRighe, eliminaDatiDimostrativi, svuotaTutto } from '../../core/db/pulizia'
 import UltimaDettatura from './UltimaDettatura'
+import Account from './Account'
 import { configurazioneServizio, impostaServizio, provaServizio } from '../../core/ocr'
 
 export default function Impostazioni({ azienda }: { azienda: Azienda }) {
@@ -121,6 +122,8 @@ export default function Impostazioni({ azienda }: { azienda: Azienda }) {
 
   return (
     <>
+      <Account />
+
       {/* In cima quello che serve all'agricoltore, non quello che serve all'ispettore. */}
       <Link to="/confronto" className="scheda scheda-cliccabile">
         <strong style={{ fontSize: 18 }}>📈 Confronto fra annate</strong>

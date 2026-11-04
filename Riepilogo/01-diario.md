@@ -7,6 +7,35 @@ Voce più recente in cima.
 
 ---
 
+## 4 novembre 2026 — Account e copia dei dati su Supabase
+
+**Fatto: il progetto Supabase `lucky-farm`** (dettagli in
+`06-servizi-esterni.md`) e lo schema `supabase/schema.sql`: una tabella sola,
+`record`, generica (tabella, id, contenuto JSON), protetta dalla RLS: ognuno
+vede solo le sue righe. Generica perché aggiungere un tipo di dato nell'app
+non deve chiedere di toccare il server.
+
+**Fatto: accesso e copia** (`src/core/sync/`, Impostazioni → in cima).
+Accesso con un **codice per email**, niente password. La copia parte da sola
+(all'avvio, ogni 5 minuti, al ritorno della rete, alla chiusura): manda quello
+che è cambiato, scarica quello che è arrivato, vince la versione più recente.
+Il telefono resta la fonte di verità: senza account l'app funziona uguale.
+Su un telefono nuovo l'azienda vuota creata al primo avvio si fonde con quella
+che arriva dal server.
+
+**Perché il codice e non il link nell'email:** l'app usa gli indirizzi col
+`#` e il link di Supabase ci scrive sopra; e nell'app installata il link si
+aprirebbe nel browser, non nell'app. Il codice funziona ovunque.
+
+**Limiti, detti chiari:** foto e audio non viaggiano ancora (vanno
+nell'archivio file di Supabase); una riga cancellata davvero resta sul
+server (nel quaderno però si annulla, non si cancella); i dati dimostrativi
+non si copiano. **L'email di Supabase di serie** manda pochi messaggi l'ora e
+solo agli indirizzi del team: per i clienti serve un servizio di posta
+(SMTP, es. Resend, gratuito fino a 3000 email/mese). Google arriva dopo.
+
+---
+
 ## 2 novembre 2026, sera — Il magazzino si scarica dalle note; account e store
 
 **Fatto: il magazzino legge le note.** "Dato 2,5 kg di rame" toglie 2,5 kg

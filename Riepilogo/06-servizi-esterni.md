@@ -30,6 +30,10 @@ Impostazioni scelte alla creazione: Data API accesa; esposizione automatica
 delle nuove tabelle **spenta** (si aprono una per una); RLS automatica
 **accesa**.
 
+**Da fare nel pannello** (fatto da Max?): in *Authentication → Emails*,
+nei modelli *Magic Link* e *Confirm signup*, aggiungere `{{ .Token }}` perché
+nell'email arrivi il codice. Per i clienti: SMTP proprio (vedi diario 04/11).
+
 Nel codice l'indirizzo e la chiave stanno in `src/core/sync/config.ts`.
 
 ## GitHub
