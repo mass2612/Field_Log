@@ -9,3 +9,6 @@ dev-dist
 #   gh auth refresh -s workflow
 # Finché non lo si aggiunge si pubblica con: npm run pubblica
 .github/workflows/
+
+# Gli APK di prova: si rifanno, non si versionano.
+apk/

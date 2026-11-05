@@ -20,6 +20,9 @@
  * funziona, smette di riprovare a ogni nota e lo dice, invece di far finta.
  */
 
+import { Capacitor } from '@capacitor/core'
+import { RiconoscimentoNativo } from './riconoscimentoNativo'
+
 /** Perché la trascrizione non c'è. Mai tirare a indovinare. */
 export type MotivoMancataTrascrizione =
   | 'non_supportato'
@@ -141,6 +144,8 @@ interface RiconoscimentoVocale {
 }
 
 function costruttoreRiconoscimento(): (new () => RiconoscimentoVocale) | undefined {
+  // Nell'app installata quello del browser c'è ma non funziona: vedi `riconoscimentoNativo.ts`.
+  if (Capacitor.isNativePlatform()) return RiconoscimentoNativo
   const w = window as unknown as {
     SpeechRecognition?: new () => RiconoscimentoVocale
     webkitSpeechRecognition?: new () => RiconoscimentoVocale

@@ -7,6 +7,35 @@ Voce più recente in cima.
 
 ---
 
+## 5 novembre 2026 — La prima app Android, con le notifiche
+
+**Fatto: l'app Android** (Capacitor 7, cartella `android/`): lo stesso codice
+del sito, impacchettato. Nome provvisorio **Lucky Farm**, identificativo
+`com.luckyfarm.app`: **da confermare prima del Play Store**, poi non si
+cambia più. L'APK di prova si rifà con: `npm run build`, `npx cap sync
+android`, poi `android/gradlew assembleDebug` con JAVA_HOME sul JDK 21 di
+Android Studio (`C:Program FilesAndroidAndroid Studiojbr`). Il primo
+build ci mette 10-15 minuti, i successivi pochi.
+
+**Fatto: le notifiche ad app chiusa** (`core/rules/promemoria.ts` decide
+cosa e quando, `core/notifiche/useNotifiche.ts` le programma). Suonano alle
+8 di mattina: la raccomandazione il primo giorno del suo mese, il documento
+un mese prima e il giorno della scadenza. A ogni cambiamento si rifà il piano
+da capo, così una raccomandazione fatta o spostata non suona più. Il permesso
+si chiede solo quando c'è qualcosa da ricordare. Nel sito non fanno niente.
+
+**Trovato e risolto prima di scoprirlo sul telefono: la dettatura.** Dentro
+l'app Android il riconoscimento vocale del browser c'è ma non funziona. Si usa
+quello del telefono (plugin `speech-recognition`) travestito da quello del
+browser (`core/voce/riconoscimentoNativo.ts`), così le regole della
+trascrizione restano le stesse. **Da provare sul telefono**: è la parte più a
+rischio.
+
+**Non ancora:** foto e audio sul server, accesso con Google, firma per lo
+store, iPhone.
+
+---
+
 ## 4 novembre 2026 — Account e copia dei dati su Supabase
 
 **Fatto: il progetto Supabase `lucky-farm`** (dettagli in
