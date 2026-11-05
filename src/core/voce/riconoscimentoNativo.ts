@@ -70,7 +70,16 @@ export class RiconoscimentoNativo {
       if (esito?.matches?.[0]) this.emetti(esito.matches[0], true)
     } catch (e) {
       const messaggio = e instanceof Error ? e.message : String(e)
-      this.onerror?.({ error: /permission/i.test(messaggio) ? 'not-allowed' : /match/i.test(messaggio) ? 'no-speech' : 'network' })
+      // I testi sono quelli di Android: "No match", "No speech input" dopo una
+      // pausa; "Client side error" o "busy" quando si riapre troppo in fretta.
+      const errore = /permission/i.test(messaggio)
+        ? 'not-allowed'
+        : /match|speech input|timeout/i.test(messaggio)
+          ? 'no-speech'
+          : /client|busy/i.test(messaggio)
+            ? 'aborted'
+            : 'network'
+      this.onerror?.({ error: errore })
       this.chiudi()
     }
   }

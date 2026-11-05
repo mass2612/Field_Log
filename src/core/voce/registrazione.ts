@@ -409,6 +409,10 @@ export class Trascrittore {
     }
 
     r.onerror = (e) => {
+      // Una pausa lunga (nessuna parola sentita) non è un guasto: sul telefono
+      // il riconoscimento la chiude con un errore, e fermarsi lì interrompeva
+      // chi stava solo pensando. Si lascia che `onend` riapra la sessione.
+      if (!this.fermatoDaNoi && (e?.error === 'no-speech' || e?.error === 'aborted')) return
       this.codiceErrore = e?.error
       this.motivo = motivoDaCodice(e?.error)
       // Su un errore non si riprova: se il servizio non risponde, riaprire

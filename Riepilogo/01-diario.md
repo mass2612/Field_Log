@@ -7,6 +7,29 @@ Voce più recente in cima.
 
 ---
 
+## 5 novembre 2026, sera — Primo collaudo sul telefono; l'idea del fatturiere
+
+Max ha installato l'APK: funziona. Unico difetto: **facendo una pausa la
+dettatura si interrompe** mentre lui prosegue. Causa: dopo qualche secondo di
+silenzio Android chiude il riconoscimento con un errore ("No match" / "No speech
+input"), e noi trattavamo l'errore come un guasto, smettendo di ascoltare. Ora
+la pausa riapre la sessione come una chiusura normale (fino a 20 volte); lo
+stesso per "Client side error"/"busy", che capitano riaprendo in fretta. Rifatto
+l'APK (`apk/LuckyFarm-prova-2026-11-05b.apk`), da riprovare.
+
+**Fatturiere a voce.** Max vuole dettare pesi, articoli e lotti, dire "stampa",
+vedere l'anteprima, confermare. Convinto che i gestionali vendano poco a molto.
+Punto fermo: in Italia la fattura stampata non vale (XML allo SdI dal 2019,
+anche per gli agricoltori, salvo esonero sotto 7.000 €). Quello che descrive —
+righe con pesi e lotti, stampato e consegnato con la merce — è il **DDT**.
+Proposta in tre passi: 1) DDT dettato e stampato; 2) fattura differita a fine
+mese in XML, caricata a mano gratis su *Fatture e Corrispettivi*; 3) invio
+automatico tramite intermediario. Candidato naturale per la parte a pagamento.
+In attesa: come lavora oggi Max (bolle sì/no, chi emette le fatture).
+
+Acceso il **Remote Control** sulla sessione: Max può seguirla dall'app Claude
+sul telefono, purché il PC resti acceso.
+
 ## 5 novembre 2026 — La prima app Android, con le notifiche
 
 **Fatto: l'app Android** (Capacitor 7, cartella `android/`): lo stesso codice
