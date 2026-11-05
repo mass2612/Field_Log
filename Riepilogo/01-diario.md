@@ -27,6 +27,19 @@ mese in XML, caricata a mano gratis su *Fatture e Corrispettivi*; 3) invio
 automatico tramite intermediario. Candidato naturale per la parte a pagamento.
 In attesa: come lavora oggi Max (bolle sì/no, chi emette le fatture).
 
+**Risposta di Max: sì a tutto, e in più l'XML e l'invio a fine mese.** Vuole
+che l'app generi anche la fattura elettronica, e che a fine mese mandi a ogni
+cliente (previa autorizzazione) la fattura in PDF. Le regole le verifica col
+commercialista. **Moncucco S.S.A. sarà il primo cliente reale**: lavora già con
+DDT e fattura differita, per il riso e soprattutto per i capi macellati.
+
+La scena da cui partire, 50 volte al giorno: la mamma pesa, stampa il peso e
+scrive su un biglietto il nome del cliente e gli articoli; il fratello prende la
+cassetta, imballa, poi va al computer e **ricopia i biglietti nel gestionale**.
+Peggio ancora se si è da soli. Il valore è eliminare quel ricopiare: il DDT
+deve nascere alla pesa, a voce (o col peso letto dalla bilancia), e la fattura
+deve venire da sé dai DDT. Vedi F1 in 03-domande-aperte.
+
 Acceso il **Remote Control** sulla sessione: Max può seguirla dall'app Claude
 sul telefono, purché il PC resti acceso.
 

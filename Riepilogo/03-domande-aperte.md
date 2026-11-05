@@ -5,6 +5,36 @@ spostata nel `01-diario.md` con la data e il motivo.
 
 ---
 
+## F1 — Fatturiere a voce: DDT, fattura XML, invio a fine mese (05/11/2026)
+
+Deciso di farlo. Primo cliente reale: Moncucco S.S.A. (riso e capi macellati).
+Flusso: alla pesa si detta (o si legge dalla bilancia) cliente, articolo, peso,
+lotto → anteprima → stampa del DDT. A fine mese: fattura differita per cliente
+in XML FatturaPA, PDF, invio della copia al cliente per email/PEC (con suo
+consenso); l'XML allo SdI prima caricato a mano su *Fatture e Corrispettivi*,
+poi tramite intermediario.
+
+Da sapere da Max:
+- bilancia: marca, modello, se ha un'uscita (USB, seriale, Bluetooth, rete);
+- stampante usata alla pesa e per i DDT;
+- gestionale attuale (per riprendere clienti, articoli, listini) e un DDT e una
+  fattura veri come modello;
+- clienti: aziende, privati o entrambi.
+
+Da chiedere al commercialista:
+- regime IVA (speciale agricolo art. 34 o ordinario) e aliquote per carne e riso;
+- numerazione di DDT e fatture, e se va tenuta con quella del gestionale attuale;
+- vendite ai privati: servono corrispettivi/scontrino?
+- obblighi in etichetta e sul DDT per la carne (origine, lotto, bollo del macello);
+- conservazione a norma per 10 anni: chi la fa.
+
+Note tecniche: la numerazione progressiva deve nascere sul server (più telefoni
+insieme non devono dare due volte lo stesso numero). La PEC si manda con le
+credenziali della casella dell'azienda, inserite dall'azienda stessa; per la
+copia di cortesia basta anche l'email normale.
+
+---
+
 ## In lavorazione adesso (27/09/2026)
 
 C1 (schede non più correggibili dopo il salvataggio) e C2 (il tipo scelto nel
