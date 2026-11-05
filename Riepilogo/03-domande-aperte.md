@@ -8,8 +8,24 @@ spostata nel `01-diario.md` con la data e il motivo.
 ## F1 — Fatturiere a voce: DDT, fattura XML, invio a fine mese (05/11/2026)
 
 Deciso di farlo. Primo cliente reale: Moncucco S.S.A. (riso e capi macellati).
-Flusso: alla pesa si detta (o si legge dalla bilancia) cliente, articolo, peso,
-lotto → anteprima → stampa del DDT. A fine mese: fattura differita per cliente
+Gestionale attuale: **Zucchetti** (da tenere presente: da lì si riprendono
+clienti e articoli, ed è il termine di paragone).
+
+**Il flusso giusto (corretto da Max il 05/11):** si parte dall'**ordine**, non
+dalla pesa.
+1. Arriva l'ordine per telefono o WhatsApp. Patrizio apre l'app e lo detta
+   (cliente, 15 polli, 18 piccioni, 3 faraone…). L'ordine resta in carico, con
+   la sua data; si può stampare subito il biglietto e sapere cosa produrre
+   (somma degli ordini del giorno).
+2. Al momento della consegna si apre la bolla **dall'ordine**: le righe ci sono
+   già, si compilano solo peso e lotto. Il riferimento all'ordine resta
+   nell'app, non va stampato sul DDT.
+3. Caso normale: DDT, e a fine mese fattura differita.
+   Caso con fattura accompagnatoria: si fanno insieme DDT e fattura immediata.
+
+(La prima ipotesi — DDT che nasce alla pesa — era sbagliata.)
+
+A fine mese: fattura differita per cliente
 in XML FatturaPA, PDF, invio della copia al cliente per email/PEC (con suo
 consenso); l'XML allo SdI prima caricato a mano su *Fatture e Corrispettivi*,
 poi tramite intermediario.
