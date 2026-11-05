@@ -25,6 +25,15 @@ dalla pesa.
 
 (La prima ipotesi — DDT che nasce alla pesa — era sbagliata.)
 
+Decisi da Max il 05/11:
+- l'ordine è a pezzi, la bolla segue quello che è uscito davvero; se si consegna
+  meno del richiesto **l'ordine si chiude lo stesso** (niente residui);
+- **ordine da WhatsApp**: si inoltra il messaggio del cliente all'app (condividi
+  → Lucky Farm) e diventa un ordine da controllare. Max: "mi interessa eccome";
+- **prezzi per tipologia di cliente**: rivenditore o cliente finale (due
+  listini, il cliente ne ha uno).
+- In arrivo: foto di un DDT vero.
+
 A fine mese: fattura differita per cliente
 in XML FatturaPA, PDF, invio della copia al cliente per email/PEC (con suo
 consenso); l'XML allo SdI prima caricato a mano su *Fatture e Corrispettivi*,
