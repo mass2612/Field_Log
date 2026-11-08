@@ -314,6 +314,14 @@ mirata nella versione gratuita. Da sciogliere:
   mai dai contenuti delle note senza consenso; niente pubblicità a chi arriva
   tramite associazione.
 
+**Deciso l'08/11 — cosa si paga.** A pagamento: la copia di foto e vocali sul
+server e l'azienda con più persone (più account sullo stesso quaderno). Max
+manderà la tabella prezzi. Chi non paga riceve un promemoria per non perdere
+tutto; se non rinnova, può esportarsi i dati in CSV alla propria email e da lì
+se li gestisce da sé. Accesso con Google e invio email vero (Resend) vanno
+fatti comunque, prima di uscire: non servono la VPS. Il design (icona e il
+resto) è fondamentale: ci si lavorerà molto.
+
 ### T5 — Annata agraria configurabile
 
 Oggi l'annata è l'anno solare. Per molte colture non è vero.

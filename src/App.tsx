@@ -2,6 +2,7 @@ import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useAvvisi, useAzienda, useOnline } from './core/db/azienda'
 import { useMeteoOggi } from './core/meteo/meteo'
 import { useCopiaAutomatica } from './core/sync/useCopiaAutomatica'
+import { useRitornoDaGoogle } from './core/sync/accessoGoogle'
 import { useNotifiche } from './core/notifiche/useNotifiche'
 import Home from './features/home/Home'
 import Quaderno from './features/quaderno/Quaderno'
@@ -37,6 +38,7 @@ export default function App() {
   const naviga = useNavigate()
   const meteo = useMeteoOggi(azienda)
   useCopiaAutomatica()
+  useRitornoDaGoogle()
   useNotifiche(azienda?.id)
 
   const inHome = posizione.pathname === '/'

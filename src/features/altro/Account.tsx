@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../../core/sync/client'
 import { sincronizza, ultimaCopia } from '../../core/sync/sincronizza'
 import { fmtIstante } from '../../core/i18n'
+import { entraConGoogle } from '../../core/sync/accessoGoogle'
 
 /**
  * Account e copia dei dati.
@@ -156,6 +157,21 @@ export default function Account() {
               </button>
             )}
           </div>
+          {!codiceMandato && (
+            <div className="pila" style={{ marginTop: 8 }}>
+              <button
+                className="pulsante-secondario"
+                disabled={occupato}
+                onClick={() =>
+                  void prova(async () => {
+                    await entraConGoogle()
+                  })
+                }
+              >
+                Entra con Google
+              </button>
+            </div>
+          )}
         </>
       )}
 
@@ -166,6 +182,7 @@ export default function Account() {
 
 /** I messaggi di Supabase sono in inglese: i più comuni, detti in italiano. */
 function traduci(messaggio: string): string {
+  if (/provider is not enabled|unsupported provider/i.test(messaggio)) return "L'accesso con Google non è ancora attivo."
   if (/rate limit|security purposes/i.test(messaggio)) return 'Troppi codici di fila: riprova fra qualche minuto.'
   if (/expired|invalid/i.test(messaggio)) return 'Codice sbagliato o scaduto. Fattene mandare un altro.'
   if (/email/i.test(messaggio) && /valid/i.test(messaggio)) return 'Email non valida.'

@@ -6,7 +6,8 @@ let client: SupabaseClient | undefined
 /** Il collegamento a Supabase, creato alla prima richiesta. La sessione resta sul telefono. */
 export function supabase(): SupabaseClient {
   client ??= createClient(SUPABASE_URL, SUPABASE_CHIAVE_PUBBLICA, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+    // PKCE: il ritorno da Google arriva come `?code=`, non nel `#` delle pagine.
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType: 'pkce' },
   })
   return client
 }
