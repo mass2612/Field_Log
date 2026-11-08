@@ -12,3 +12,6 @@ dev-dist
 
 # Gli APK di prova: si rifanno, non si versionano.
 apk/
+
+# bozze con dati veri di clienti: mai nel repo (pubblico)
+bozze/

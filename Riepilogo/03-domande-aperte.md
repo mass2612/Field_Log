@@ -43,6 +43,26 @@ Precisazioni dell'08/11:
   ricopiare nulla;
 - formato nostro: chiaro e a norma, non la copia di un gestionale.
 
+Decisioni sulla bozza (`bozze/ddt-e-fattura.html`, fuori dal repo), 08/11:
+- prezzi: l'utente sceglie. Listino facoltativo, **diverso per cliente**; il
+  prezzo si può sempre scrivere a mano nel DDT. Flag **"nascondi prezzi nel
+  DDT"**, ricordato (per cliente) finché non si toglie;
+- **bollo sanitario** (es. IT 0 1023 S CE; M = macellazione, S = macellazione e
+  sezionamento, rilasciato dall'ASL al centro produttivo): lo inserisce
+  l'utente se gli serve, mai proposto né chiesto da noi;
+- "da consumarsi entro" sta in etichetta, non nel DDT: campo facoltativo con
+  dicitura a scelta, solo nell'interfaccia, non nel modello standard;
+- luogo di consegna solo nel DDT (e nella fattura accompagnatoria);
+- codici articolo: non servono, si cerca per descrizione. Se serve un indice,
+  codice alfanumerico corto (2–6 caratteri).
+- Codici SdI: per **inviare** non serve un codice nostro (portale gratuito, PEC
+  a sdi01@pec.fatturapa.it, o canale accreditato SDICoop/SFTP). Il **codice
+  destinatario** di 7 caratteri serve per **ricevere**: SUBM70N, quello oggi sul
+  DDT di Moncucco, è del canale di Zucchetti. Cambiando gestionale va
+  registrato l'indirizzo telematico su *Fatture e Corrispettivi*. Un canale
+  accreditato nostro (con codice nostro) permetterebbe di ricevere anche le
+  fatture dei fornitori → carico del magazzino automatico.
+
 Esempi visti (in `Downloads` di Max, **non nel repo, che è pubblico**):
 - *Moncucco → Cum Quibus, fatt. 159/2018*, curata da Max: la migliore. Righe
   raggruppate sotto "BOLLA – D.D.T. N. … del …", origine e lotto sotto ogni
