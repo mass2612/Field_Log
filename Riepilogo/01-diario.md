@@ -7,6 +7,26 @@ Voce più recente in cima.
 
 ---
 
+## 8 novembre 2026 — Il piano di uscita, e la bozza di DDT e fattura
+
+**Deciso da Max: si esce in due tempi.** Prima Lucky Farm con il Quaderno di
+campagna e l'Assistente personale; dopo qualche settimana la parte gestionale
+(ordini, DDT, fatture). Poi si migliora. La parte di intelligenza artificiale si
+ragiona dopo l'acquisto della VPS.
+
+Fatta la **bozza di DDT e fattura differita** sui dati veri di Moncucco
+(`bozze/ddt-e-fattura.html`, fuori dal repo perché pubblico). Max: "già buono".
+Le sue correzioni sono in F1 (03-domande-aperte): prezzi, bollo sanitario,
+"da consumarsi entro" e codice articolo sono scelte dell'utente, non parte del
+modello standard.
+
+**Codici SdI chiariti:** per inviare non serve un codice nostro; il codice
+destinatario serve a ricevere, e quello sul DDT di Moncucco (SUBM70N) è del
+canale Zucchetti. Proposta: partire con l'invio via PEC allo SdI (gratis),
+accreditare un canale nostro (SDICoop) quando ci sono VPS e volumi.
+
+---
+
 ## 5 novembre 2026, sera — Primo collaudo sul telefono; l'idea del fatturiere
 
 Max ha installato l'APK: funziona. Unico difetto: **facendo una pausa la
