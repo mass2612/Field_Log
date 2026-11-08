@@ -30,9 +30,35 @@ Decisi da Max il 05/11:
   meno del richiesto **l'ordine si chiude lo stesso** (niente residui);
 - **ordine da WhatsApp**: si inoltra il messaggio del cliente all'app (condividi
   → Lucky Farm) e diventa un ordine da controllare. Max: "mi interessa eccome";
-- **prezzi per tipologia di cliente**: rivenditore o cliente finale (due
-  listini, il cliente ne ha uno).
-- In arrivo: foto di un DDT vero.
+- prezzi diversi per rivenditore e cliente finale — ma l'08/11 precisato:
+  **ogni cliente ha i suoi articoli e i suoi prezzi** (vedi sotto).
+
+Precisazioni dell'08/11:
+- deve essere **comodo da PC oltre che da tablet/telefono** e facilmente
+  personalizzabile (logo e altre caratteristiche dell'utente, poi);
+- **niente listino da chiedere**: ogni cliente ha i suoi articoli e i suoi
+  prezzi. L'app li impara dall'uso (l'ultimo prezzo fatto a quel cliente per
+  quell'articolo) e, all'avvio, dalle fatture XML già emesse (scaricabili in
+  blocco da *Fatture e Corrispettivi*): clienti, articoli e prezzi senza
+  ricopiare nulla;
+- formato nostro: chiaro e a norma, non la copia di un gestionale.
+
+Esempi visti (in `Downloads` di Max, **non nel repo, che è pubblico**):
+- *Moncucco → Cum Quibus, fatt. 159/2018*, curata da Max: la migliore. Righe
+  raggruppate sotto "BOLLA – D.D.T. N. … del …", origine e lotto sotto ogni
+  articolo, bollo CE del macello in testa (IT 0 1023 S CE), omaggi senza prezzo,
+  spese di spedizione al 22%, riepilogo IVA per aliquota, scadenza calcolata.
+- *Cerealfarine → Moncucco, fatt. 2275/2023*: impaginazione pulita (riquadro con
+  codice cliente, P.IVA, data, tipo, numero; pagamento, banca, IBAN, scadenze),
+  "Copia di cortesia, priva di valenza fiscale (art. 21 DPR 633/72)",
+  dicitura art. 62 DL 1/2012.
+- *Zucchetti oggi (DDT 1044 MOGO, fatt. 484 Lariohotels)*: righe spazzatura
+  "0,00 0,00 0,00" sotto il rif. DDT e sotto il lotto; lotto ripetuto dentro la
+  descrizione (L45/2) e sotto; manca il bollo CE; peso lordo/netto e vettore
+  vuoti; "N. colli 1,00". Da non imitare.
+- Dati Moncucco: P.IVA/CF 02481480024, codice SDI SUBM70N, aliquote 10% carne,
+  22% spedizione, 4% cereali; lotti tipo "45/2" con scadenza; pagamento tipico
+  Ri.Ba. 30 gg fine mese.
 
 A fine mese: fattura differita per cliente
 in XML FatturaPA, PDF, invio della copia al cliente per email/PEC (con suo
