@@ -7,6 +7,21 @@ spostata nel `01-diario.md` con la data e il motivo.
 
 ## F1 — Fatturiere a voce: DDT, fattura XML, invio a fine mese (05/11/2026)
 
+**Idea di Max del 10/11 (da decidere): due app, un solo codice.** Agrizen esce
+prima, da sola, con la sua grafica. Il fatturiere diventa anche un'app a sé, con
+un altro nome e dominio, per chi non è agricoltore (fatture e spese da foto,
+ordini da WhatsApp). Per l'agricoltore il fatturiere è un modulo che compare
+dentro Agrizen: stesso account Google/Supabase, quindi un solo utente e uno
+sconto se paga già. Motivo: l'agricoltore capisce meglio una sola app;
+commercialmente si apre un secondo mercato. Note: abbonamenti sul server
+(uguali per le due app); dentro gli store gli abbonamenti passano dal sistema di
+pagamento di Google/Apple (commissione 15%); per i non agricoltori partire da
+chi vende merce (niente professionisti: ritenute, casse, forfettari).
+
+**Numerazione dei DDT senza rete:** non può dipendere dal server (la bolla si fa
+anche dove non c'è campo). Da pensare: blocchi di numeri riservati a ogni
+dispositivo, o serie per dispositivo. (Spunto dalla revisione esterna del 10/11.)
+
 Deciso di farlo. Primo cliente reale: Moncucco S.S.A. (riso e capi macellati).
 Gestionale attuale: **Zucchetti** (da tenere presente: da lì si riprendono
 clienti e articoli, ed è il termine di paragone).
