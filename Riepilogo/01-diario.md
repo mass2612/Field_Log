@@ -15,6 +15,20 @@ Voce più recente in cima.
 **"Lucky Farm" non va:** sul Play Store ci sono già "Lucky Farm Tap" e "Lucky
 Farm Tycoon", giochi casual. Max cerca un nome nuovo partendo dal dominio libero;
 nome, dominio, identificativo dell'app e pagina di Google ne dipendono.
+**Nome scelto: Agrizen** (preferito ad Agrismart: domini tutti presi, "smart"
+è descrittivo e fa un marchio debole). Agrizen dice la filosofia: l'agricoltore
+lavora tranquillo, la burocrazia la sbriga l'app. Dominio: solo `agrizen.it`
+(Aruba, 4 € + IVA, rinnovo 12 €); `.com` è parcheggiato in vendita, `.app` preso,
+`.eu` scartato da Max. **Prima l'Italia**: il `.com` si cerca se i numeri
+arrivano. Da fare: marchio EUIPO, non troppo tardi. Somiglianza da tenere
+presente: AgriZapp (spin-off Univ. Firenze).
+
+**xFarm** (concorrente grosso, partito prima): Max l'ha studiato. Loro puntano
+a rendere il cliente conforme, noi a una gestione utile da cui la conformità
+viene da sé. Usano WhatsApp come stampella perché l'app non legge i vocali;
+non leggono foto e documenti. Noi: vocali e foto nell'app, WhatsApp solo per
+inoltrare ordini e informazioni ricevute.
+
 Max prende la VPS (Hetzner) a giorni; chiede di aspettare prima di lavorare
 su foto e vocali sul server (che in realtà vanno su Supabase Storage).
 
