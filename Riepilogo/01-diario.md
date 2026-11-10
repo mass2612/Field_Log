@@ -23,6 +23,12 @@ lavora tranquillo, la burocrazia la sbriga l'app. Dominio: solo `agrizen.it`
 arrivano. Da fare: marchio EUIPO, non troppo tardi. Somiglianza da tenere
 presente: AgriZapp (spin-off Univ. Firenze).
 
+**Chi vende Agrizen:** si parte come Moncucco S.S.A. (il commercialista, sentito
+di persona, ha detto che va bene per cifre piccole). Se si arriva a ~1.000 €/mese
+Max apre una nuova attività che acquista da Moncucco (che deve restare
+prevalentemente agricola); l'app si trasferisce allora da un account
+sviluppatore all'altro (Google e Apple lo permettono, abbonamenti compresi).
+
 **xFarm** (concorrente grosso, partito prima): Max l'ha studiato. Loro puntano
 a rendere il cliente conforme, noi a una gestione utile da cui la conformità
 viene da sé. Usano WhatsApp come stampella perché l'app non legge i vocali;
