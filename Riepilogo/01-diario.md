@@ -7,6 +7,19 @@ Voce più recente in cima.
 
 ---
 
+## 10 novembre 2026 — Accesso con Google; il nome è da rifare
+
+**Accesso con Google attivo** e provato da Max sul sito (dettagli in
+06-servizi-esterni). APK con il pulsante mandato, da provare sul telefono.
+
+**"Lucky Farm" non va:** sul Play Store ci sono già "Lucky Farm Tap" e "Lucky
+Farm Tycoon", giochi casual. Max cerca un nome nuovo partendo dal dominio libero;
+nome, dominio, identificativo dell'app e pagina di Google ne dipendono.
+Max prende la VPS (Hetzner) a giorni; chiede di aspettare prima di lavorare
+su foto e vocali sul server (che in realtà vanno su Supabase Storage).
+
+---
+
 ## 8 novembre 2026 — Il piano di uscita, e la bozza di DDT e fattura
 
 **Deciso da Max: si esce in due tempi.** Prima Lucky Farm con il Quaderno di
