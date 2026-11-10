@@ -1,4 +1,4 @@
-package com.luckyfarm.app;
+package it.agrizen.app;
 
 import com.getcapacitor.BridgeActivity;
 

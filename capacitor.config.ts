@@ -4,11 +4,11 @@ import type { CapacitorConfig } from '@capacitor/cli'
  * L'app per gli store: lo stesso codice del sito, impacchettato.
  *
  * `appId` è **per sempre**: una volta sul Play Store non si cambia più (sarebbe
- * un'altra app). Va confermato prima della prima pubblicazione.
+ * un'altra app). Scelto il 10/11/2026, dal dominio agrizen.it.
  */
 const config: CapacitorConfig = {
-  appId: 'com.luckyfarm.app',
-  appName: 'Lucky Farm',
+  appId: 'it.agrizen.app',
+  appName: 'Agrizen',
   webDir: 'dist',
   plugins: {
     LocalNotifications: {

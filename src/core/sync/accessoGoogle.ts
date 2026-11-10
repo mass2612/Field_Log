@@ -14,13 +14,13 @@ import { sincronizza } from './sincronizza'
  *
  * - Nel sito si torna alla pagina stessa.
  * - Nell'app installata Google si apre nel browser del telefono, e si torna
- *   all'app con l'indirizzo `com.luckyfarm.app://accesso` (dichiarato nel
+ *   all'app con l'indirizzo `it.agrizen.app://accesso` (dichiarato nel
  *   manifest Android).
  *
  * Gli indirizzi di ritorno vanno elencati anche su Supabase, in
  * Authentication → URL Configuration → Redirect URLs.
  */
-export const RITORNO_APP = 'com.luckyfarm.app://accesso'
+export const RITORNO_APP = 'it.agrizen.app://accesso'
 
 export async function entraConGoogle(): Promise<void> {
   if (Capacitor.isNativePlatform()) {

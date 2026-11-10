@@ -45,7 +45,15 @@ Nel codice l'indirizzo e la chiave stanno in `src/core/sync/config.ts`.
   e secret. **Il secret sta solo lì**, mai nel repo.
 - Supabase → URL Configuration: Site URL `https://mass2612.github.io/Field_Log/`;
   Redirect URLs: il sito, `http://localhost:5173/Field_Log/`,
-  `com.luckyfarm.app://accesso` (ritorno nell'app Android).
+  `it.agrizen.app://accesso` (ritorno nell'app Android; fino al 10/11 era
+  `com.luckyfarm.app://accesso`, da togliere).
+
+## Dominio agrizen.it (comprato il 10/11/2026)
+
+Su **Aruba**, solo dominio (4 € + IVA il primo anno, rinnovo 12 € + IVA).
+Nessun hosting né casella. Le email partiranno da Resend
+(`noreply@agrizen.it`); per riceverle, un inoltro gratuito verso la Gmail di
+Max. L'app si chiama **Agrizen**, identificativo `it.agrizen.app` (per sempre).
 - **Da fare:** il secret è passato in uno screenshot della chat il 10/11: crearne
   uno nuovo su Google, metterlo su Supabase, disattivare il vecchio. Verificare
   che l'app su Google sia "pubblicata" (non solo utenti di prova). Google mostra

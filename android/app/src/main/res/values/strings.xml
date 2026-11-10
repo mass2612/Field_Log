@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Lucky Farm</string>
-    <string name="title_activity_main">Lucky Farm</string>
-    <string name="package_name">com.luckyfarm.app</string>
-    <string name="custom_url_scheme">com.luckyfarm.app</string>
+    <string name="app_name">Agrizen</string>
+    <string name="title_activity_main">Agrizen</string>
+    <string name="package_name">it.agrizen.app</string>
+    <string name="custom_url_scheme">it.agrizen.app</string>
 </resources>

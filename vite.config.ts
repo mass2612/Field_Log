@@ -35,9 +35,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Quaderno di Campagna',
-        short_name: 'Quaderno',
-        description: 'Registro di campagna offline per aziende agricole',
+        name: 'Agrizen',
+        short_name: 'Agrizen',
+        description: 'Il quaderno di campagna che si compila da solo',
         theme_color: '#1b5e20',
         background_color: '#f5f3ee',
         display: 'standalone',
