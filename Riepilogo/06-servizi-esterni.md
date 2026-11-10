@@ -54,6 +54,14 @@ Su **Aruba**, solo dominio (4 € + IVA il primo anno, rinnovo 12 € + IVA).
 Nessun hosting né casella. Le email partiranno da Resend
 (`noreply@agrizen.it`); per riceverle, un inoltro gratuito verso la Gmail di
 Max. L'app si chiama **Agrizen**, identificativo `it.agrizen.app` (per sempre).
+
+**Da fare (rimandato da Max il 10/11):** email vere con **Resend** — account su
+resend.com, dominio agrizen.it, 3–4 righe DNS nel pannello Aruba, poi la chiave
+di Resend la incolla Max su Supabase (Authentication → Emails → SMTP). Senza,
+il codice di accesso per email arriva solo a pochi indirizzi.
+Sempre da fare: su Supabase Redirect URLs aggiungere `it.agrizen.app://accesso`
+e togliere quello di Lucky Farm; cambiare il secret di Google; su Google Auth
+Platform rinominare l'app in Agrizen e pubblicarla.
 - **Da fare:** il secret è passato in uno screenshot della chat il 10/11: crearne
   uno nuovo su Google, metterlo su Supabase, disattivare il vecchio. Verificare
   che l'app su Google sia "pubblicata" (non solo utenti di prova). Google mostra
