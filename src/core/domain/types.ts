@@ -579,6 +579,11 @@ export interface Allegato extends Tracciato {
   /** Il contenuto resta sul dispositivo finché non viene sincronizzato. */
   blob?: Blob
   urlRemota?: string
+  /**
+   * Dove sta la copia del file sul server (archivio file di Supabase,
+   * `allegati/<utente>/<id>`). Vuoto finché non è stato caricato.
+   */
+  percorsoRemoto?: string
   /** Dove è stata scattata la foto, quando disponibile. */
   posizione?: Coordinate
 }

@@ -92,8 +92,8 @@ export default function Account() {
             quando c'è rete; su un telefono nuovo basta entrare con la stessa email.
           </p>
           <p className="aiuto">
-            {ultima ? `Ultima copia: ${fmtIstante(ultima)}.` : 'Nessuna copia ancora.'} Foto e
-            registrazioni per ora restano sul telefono.
+            {ultima ? `Ultima copia: ${fmtIstante(ultima)}.` : 'Nessuna copia ancora.'} Anche foto e
+            registrazioni vengono copiate; su un telefono nuovo arrivano un po' alla volta.
           </p>
           <div className="pila">
             <button className="pulsante-principale" disabled={occupato} onClick={() => void copiaAdesso()}>

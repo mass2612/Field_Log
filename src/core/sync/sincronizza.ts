@@ -1,6 +1,8 @@
 import type { Table } from 'dexie'
 import { db } from '../db/db'
 import { supabase } from './client'
+import { caricaFile, conFileLocale, scaricaFile, senzaFile } from './file'
+import type { Allegato } from '../domain/types'
 import { daCopiare, quandoModificato, TABELLE_ESCLUSE, vinceRemota, type RigaRemota } from './unisci'
 
 /**
@@ -17,7 +19,8 @@ import { daCopiare, quandoModificato, TABELLE_ESCLUSE, vinceRemota, type RigaRem
  *    altro telefono, o dal recupero), e lo si tiene se è più recente.
  *
  * Limiti, detti chiari:
- * - le **foto e gli audio** non viaggiano ancora (vedi `TABELLE_ESCLUSE`);
+ * - le **foto e gli audio** viaggiano a parte, nell'archivio file (`file.ts`):
+ *   prima si caricano i file, poi le righe che dicono dove stanno;
  * - una riga **cancellata davvero** dal telefono resta sul server. Nel
  *   quaderno però non si cancella: si annulla, e l'annullamento viaggia.
  */
@@ -43,9 +46,11 @@ async function esegui(): Promise<EsitoCopia> {
   const { data } = await supabase().auth.getSession()
   if (!data.session) return { inviate: 0, ricevute: 0 }
   const utente = data.session.user.id
+  await caricaFile(utente)
   const inviate = await invia(utente)
   const ricevute = await ricevi(utente)
   if (ricevute > 0) await riunisciAziende()
+  await scaricaFile()
   localStorage.setItem('sync-ultima-copia', new Date().toISOString())
   return { inviate, ricevute }
 }
@@ -67,7 +72,7 @@ async function invia(utente: string): Promise<number> {
       const blocco = cambiate.slice(i, i + PAGINA).map((r) => ({
         tabella: tabella.name,
         id: String(r.id),
-        dati: r,
+        dati: tabella.name === 'allegati' ? senzaFile(r) : r,
         modificato_il: quandoModificato(r) ?? inizio,
       }))
       const { error } = await supabase()
@@ -104,7 +109,7 @@ async function ricevi(utente: string): Promise<number> {
       const locale = (await tabella.get(riga.id)) as Record<string, unknown> | undefined
       const confronto = locale && { modificatoIl: quandoModificato(locale) }
       if (vinceRemota(confronto, riga)) {
-        await tabella.put(riga.dati)
+        await tabella.put(riga.tabella === 'allegati' ? conFileLocale(riga.dati, locale as Allegato | undefined) : riga.dati)
         applicate++
       }
     }

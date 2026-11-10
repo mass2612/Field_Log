@@ -25,13 +25,10 @@ export function quandoModificato(riga: Record<string, unknown>): string | undefi
 }
 
 /**
- * Le tabelle che non viaggiano.
- *
- * `allegati` tiene foto e registrazioni: sono file, non righe, e andranno
- * nell'archivio file di Supabase in un secondo momento. Finché non c'è, le
- * foto restano sul telefono che le ha scattate.
+ * Le tabelle che non viaggiano. Oggi nessuna: anche `allegati` viaggia, ma
+ * senza il file, che va a parte nell'archivio file (vedi `file.ts`).
  */
-export const TABELLE_ESCLUSE = new Set(['allegati'])
+export const TABELLE_ESCLUSE = new Set<string>()
 
 /** I dati dimostrativi non si copiano mai: sono una prova, non il quaderno. */
 export function daCopiare(riga: Record<string, unknown>): boolean {

@@ -42,3 +42,20 @@ create policy "solo i propri dati" on public.record
 
 -- Le tabelle nuove non si aprono da sole (scelto alla creazione): si apre questa.
 grant select, insert, update, delete on public.record to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Foto e registrazioni (aggiunto il 10/11/2026).
+--
+-- I file stanno nell'archivio file di Supabase, bucket privato `allegati`,
+-- una cartella per utente: `<id utente>/<id allegato>`. Ognuno legge e scrive
+-- solo nella sua cartella. Si può rieseguire.
+
+insert into storage.buckets (id, name, public)
+values ('allegati', 'allegati', false)
+on conflict (id) do nothing;
+
+drop policy if exists "allegati: solo i propri file" on storage.objects;
+create policy "allegati: solo i propri file" on storage.objects
+  for all to authenticated
+  using (bucket_id = 'allegati' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'allegati' and (storage.foldername(name))[1] = (select auth.uid())::text);
