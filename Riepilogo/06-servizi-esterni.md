@@ -36,6 +36,22 @@ nell'email arrivi il codice. Per i clienti: SMTP proprio (vedi diario 04/11).
 
 Nel codice l'indirizzo e la chiave stanno in `src/core/sync/config.ts`.
 
+**Accesso con Google (attivo dal 10/11/2026, provato da Max sul sito).**
+- Google Cloud: progetto **Lucky Farm** (separato da *my-echo*, che è di Echo),
+  account Google di Max. Google Auth Platform → Client: client "Applicazione
+  web" con URI di reindirizzamento
+  `https://qdfgbqonlaghuxwiuaev.supabase.co/auth/v1/callback`.
+- Supabase: Authentication → Sign In / Providers → Google attivo, con ID client
+  e secret. **Il secret sta solo lì**, mai nel repo.
+- Supabase → URL Configuration: Site URL `https://mass2612.github.io/Field_Log/`;
+  Redirect URLs: il sito, `http://localhost:5173/Field_Log/`,
+  `com.luckyfarm.app://accesso` (ritorno nell'app Android).
+- **Da fare:** il secret è passato in uno screenshot della chat il 10/11: crearne
+  uno nuovo su Google, metterlo su Supabase, disattivare il vecchio. Verificare
+  che l'app su Google sia "pubblicata" (non solo utenti di prova). Google mostra
+  "Continua su qdfgbqonlaghuxwiuaev.supabase.co": si sistema con un dominio
+  nostro (dominio personalizzato di Supabase, a pagamento) prima degli store.
+
 ## GitHub
 
 - `mass2612/Field_Log` — pubblico. L'app pubblicata: https://mass2612.github.io/Field_Log/
