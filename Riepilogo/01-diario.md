@@ -7,6 +7,26 @@ Voce più recente in cima.
 
 ---
 
+## 11 novembre 2026 — Image Line apre le API di QdC; un APK bianco
+
+**Image Line (QdC) ha un'API.** Max ha parlato col tecnico: deve iscriversi e
+usarla con un account demo; loro sono disponibili a provare e a confermare che
+i dati arrivano bene. Cambia molto: invece del CSV che Confagricoltura ricopia,
+le note potrebbero arrivare in QdC direttamente. Da sapere dalla documentazione:
+come si entra (chiave, account per azienda o per associazione), cosa si può
+scrivere (trattamenti, concimazioni, magazzino), come si identificano campi e
+prodotti dalla loro parte. Le credenziali le tiene Max, mai nel repo.
+
+**APK con la pagina bianca:** errore mio. Era stato impacchettato subito dopo la
+pubblicazione del sito, con i file sotto `/Field_Log/`, che nell'app non
+esistono. Da oggi l'APK si fa solo con `npm run apk`, che ricostruisce col
+percorso giusto e si ferma se sbagliato.
+
+Foto e vocali ora viaggiano sul server (bucket `allegati` su Supabase, una
+cartella per utente; SQL eseguito da Max il 10/11). Da provare telefono → PC.
+
+---
+
 ## 10 novembre 2026 — Accesso con Google; il nome è da rifare
 
 **Accesso con Google attivo** e provato da Max sul sito (dettagli in
