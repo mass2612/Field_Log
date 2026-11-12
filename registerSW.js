@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Field_Log/sw.js', { scope: '/Field_Log/' })})}
