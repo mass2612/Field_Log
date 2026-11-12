@@ -1225,3 +1225,28 @@ textarea {
 .oggi-scadenza {
   font-weight: 600;
 }
+
+/* La prima apertura: l'invito a entrare con l'account. */
+.benvenuto {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--carta);
+  overflow-y: auto;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+}
+.benvenuto-corpo {
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.benvenuto-corpo h1 {
+  margin: 8px 0 0;
+  color: #1b5e20;
+  font-size: 1.6rem;
+}
+.benvenuto-corpo > p {
+  margin: 0;
+}

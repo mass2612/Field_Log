@@ -14,6 +14,7 @@ import DettaglioCampo from './features/campi/DettaglioCampo'
 import NuovoCampo from './features/campi/NuovoCampo'
 import Magazzino from './features/magazzino/Magazzino'
 import Impostazioni from './features/altro/Impostazioni'
+import Benvenuto from './features/altro/Benvenuto'
 import Scadenze from './features/altro/Scadenze'
 import Ispezione from './features/altro/Ispezione'
 import Anagrafiche from './features/altro/Anagrafiche'
@@ -55,6 +56,7 @@ export default function App() {
 
   return (
     <div className="guscio">
+      <Benvenuto />
       <header className="barra-alta">
         {inHome ? (
           <span className="barra-titolo">{azienda.nome}</span>
