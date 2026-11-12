@@ -40,6 +40,22 @@ Altre cose utili:
 - **Magazzino**: `POST /qdc/magazzini/carico_prodotto` crea un movimento.
 - Accesso: OAuth2 (utente e password di QdC → token), con permessi per area.
 
+## L'accesso (letto il 12/11/2026)
+
+Arrivate le credenziali della licenza demo (QdC PLUS, utente di Max). **La
+password non va mai nel repo né nell'app**: l'accesso si fa sulla pagina di
+Image Line (`GET /oauth2/auth?redirect_uri=…`, modulo loro), che rimanda
+indietro con un codice; il codice si scambia col token (`POST /oauth2/token`,
+`authorization_code` con `code_verifier`, cioè PKCE). `client_id` facoltativo.
+Agrizen non vede mai la password di QdC.
+
+Ostacolo: il server di Image Line **non accetta chiamate dal browser** da
+altri siti (CORS: la prova da `mass2612.github.io` risponde 400). Nell'app
+Android si aggira con le chiamate native; per il sito serve che Image Line
+aggiunga i nostri indirizzi, oppure un passaggio dal nostro server. Da chiedere
+a Samuele: origini ammesse, indirizzi di ritorno ammessi (il sito e
+`it.agrizen.app://qdc`), eventuale `client_id` per Agrizen.
+
 ## Cosa resta da capire (con la demo)
 
 1. Il **legame dei nomi**: "il Pero" nelle note di Agrizen ↔ l'unità produttiva
