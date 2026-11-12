@@ -33,6 +33,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // La registrazione la fa `main.tsx`, e solo nel sito: vedi lì perché.
+      injectRegister: false,
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Agrizen',
