@@ -22,6 +22,16 @@ tutto**. Si prende un paio di giorni per provarla a fondo.
 entrare con Google o con l'email, oppure "Più tardi". Max l'aveva trovato a
 intuito in Impostazioni, altri non lo troverebbero.
 
+**Prima del multiutente, l'estetica (decisione di Max).** Nomi nuovi in home:
+*Quaderno di lavoro* (era Quaderno di campagna), *Acquisisci documenti* (era
+Documenti), *Analisi campagna* (era Campi). Il meteo non chiede più dove sei:
+la posizione si chiede alla prima apertura (permesso del telefono); con le
+particelle diventerà per appezzamento. Quattro proposte di icona in
+`bozze/icone.html` (trattore che impenna, idea di Max; ensō e solchi; quaderno
+col germoglio; foglia con la Z). Grafica giudicata "ordinata ma povera":
+proposte in chat (palette terra, icone disegnate al posto delle emoji, un
+carattere per i titoli, testata col marchio).
+
 **Più persone nella stessa azienda: non c'è ancora.** Oggi ogni account ha il
 suo quaderno; lo stesso account su più telefoni funziona. Da costruire
 (servizio a pagamento): inviti, azienda condivisa sul server.
