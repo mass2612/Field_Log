@@ -145,6 +145,7 @@ Conseguenze di progetto:
 | Pacchetto Italia (tutto ciò che è italiano) | `src/packs/it/` |
 | Schermate | `src/features/` |
 | Servizi esterni (Supabase, GitHub): indirizzi, e dove NON stanno le chiavi | `Riepilogo/06-servizi-esterni.md` |
+| Le API di QdC (Image Line): cosa si può fare, il ciclo con Confagricoltura | `Riepilogo/07-qdc-api.md` |
 
 **Regola architetturale da non violare:** in `src/core` non entra niente di
 nazionale. Aggiungere la Francia deve voler dire scrivere `src/packs/fr` e basta.
