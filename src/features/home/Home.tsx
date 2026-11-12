@@ -66,7 +66,7 @@ export default function Home({
       <Piastrella
         a="/quaderno"
         icona="📓"
-        titolo="Quaderno di campagna"
+        titolo="Quaderno di lavoro"
         descrizione="Scrivi cosa hai fatto"
         stato={
           stato
@@ -83,7 +83,7 @@ export default function Home({
       <Piastrella
         a="/documenti"
         icona="📄"
-        titolo="Documenti"
+        titolo="Acquisisci documenti"
         descrizione="Fatture, patentini, certificati"
         stato={
           avvisiDocumenti.length > 0
@@ -113,7 +113,7 @@ export default function Home({
       <Piastrella
         a="/campi"
         icona="🗺️"
-        titolo="Campi"
+        titolo="Analisi campagna"
         descrizione="Come è andata, annata per annata"
         stato={
           stato

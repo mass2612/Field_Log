@@ -4,6 +4,7 @@ import { useMeteoOggi } from './core/meteo/meteo'
 import { useCopiaAutomatica } from './core/sync/useCopiaAutomatica'
 import { useRitornoDaGoogle } from './core/sync/accessoGoogle'
 import { useNotifiche } from './core/notifiche/useNotifiche'
+import { usePosizioneAutomatica } from './core/meteo/usePosizioneAutomatica'
 import Home from './features/home/Home'
 import Quaderno from './features/quaderno/Quaderno'
 import ScriviNota from './features/quaderno/ScriviNota'
@@ -41,6 +42,7 @@ export default function App() {
   useCopiaAutomatica()
   useRitornoDaGoogle()
   useNotifiche(azienda?.id)
+  usePosizioneAutomatica(azienda)
 
   const inHome = posizione.pathname === '/'
 

@@ -24,7 +24,7 @@ const it = {
   'app.nome': 'Quaderno di Campagna',
 
   'nav.oggi': 'Oggi',
-  'nav.campi': 'Campi',
+  'nav.campi': 'Analisi campagna',
   'nav.registra': 'Registra',
   'nav.magazzino': 'Magazzino',
   'nav.altro': 'Altro',
@@ -41,7 +41,7 @@ const it = {
   'azione.registraRaccolta': 'Raccolta',
   'azione.registraNota': 'Nota',
 
-  'campi.titolo': 'Campi',
+  'campi.titolo': 'Analisi campagna',
   'campi.nuovo': 'Nuovo campo',
   'campi.nessuno': 'Nessun campo. Comincia da qui.',
   'campi.superficie': 'Superficie',

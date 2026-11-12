@@ -29,7 +29,7 @@ export default function TempoOggi({
       <Link to="/impostazioni" className="scheda scheda-cliccabile tempo-oggi">
         <strong>🌤️ Il tempo di oggi</strong>
         <p className="aiuto" style={{ marginTop: 6 }}>
-          Segna una volta dov’è l’azienda e qui vedi la previsione delle prossime ore.
+          Per le previsioni serve sapere dove sei. Tocca qui e consenti la posizione.
         </p>
       </Link>
     )
