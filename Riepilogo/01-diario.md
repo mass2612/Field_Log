@@ -7,6 +7,30 @@ Voce più recente in cima.
 
 ---
 
+## 12-13 novembre 2026 — L'APK bianco risolto davvero; il benvenuto
+
+**La pagina bianca non era solo il percorso sbagliato.** L'APK rotto aveva
+lasciato nel telefono la copia per lavorare senza rete (service worker), che
+continuava a servire la versione rotta anche dopo l'APK giusto. Trovato
+facendo girare l'app su un telefono Android simulato (AVD Pixel_6, nel SDK) e
+leggendo la pagina dall'esterno. Ora nell'app installata il service worker non
+si registra e quello vecchio si toglie a ogni avvio; resta solo nel sito.
+Max ha disinstallato e reinstallato: **l'app si apre e sembra funzionare
+tutto**. Si prende un paio di giorni per provarla a fondo.
+
+**Benvenuto alla prima apertura** (richiesta di Max): propone subito di
+entrare con Google o con l'email, oppure "Più tardi". Max l'aveva trovato a
+intuito in Impostazioni, altri non lo troverebbero.
+
+**Più persone nella stessa azienda: non c'è ancora.** Oggi ogni account ha il
+suo quaderno; lo stesso account su più telefoni funziona. Da costruire
+(servizio a pagamento): inviti, azienda condivisa sul server.
+
+Credenziali della demo QdC: Max le ha incollate in chat; sono di prova
+(dati che verranno cancellati), ma restano fuori dal repo e dall'app.
+
+---
+
 ## 11 novembre 2026 — Image Line apre le API di QdC; un APK bianco
 
 **Image Line (QdC) ha un'API.** Max ha parlato col tecnico: deve iscriversi e
