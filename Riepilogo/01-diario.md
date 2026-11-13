@@ -7,6 +7,24 @@ Voce più recente in cima.
 
 ---
 
+## 13 novembre 2026, sera — L'icona: il trattore arancio che impenna
+
+**Deciso: l'icona è il trattore che impenna, arancio, disegnato da Max.** Fra le
+quattro proposte piacevano a tutti il trattore e la foglia con la Z; il trattore
+è più allegro. Max l'ha rifatto con un generatore e ha preferito la sua immagine
+al ridisegno vettoriale: si usa quella, rimpicciolita.
+- **Arancio** perché ogni colore è già di una marca (Kubota, Claas, Fiat, Ford,
+  John Deere): conta distinguersi dalle altre icone del telefono, quasi tutte blu
+  o verdi.
+- **Senza volante**: a 48 px sembrava una lettera.
+- **Senza cornice**: la forma (tonda, goccia, quadrata) la decide il telefono.
+  Gli angoli arrotondati dell'originale sono stati riempiti di cielo e terra.
+- Sorgente e versione da 512 px per il Play Store in `grafica/`. Le misure si
+  rigenerano con lo script PowerShell usato quella sera (ritaglio + System.Drawing):
+  se si cambia icona, conviene partire da un'immagine quadrata senza cornice.
+
+---
+
 ## 12-13 novembre 2026 — L'APK bianco risolto davvero; il benvenuto
 
 **La pagina bianca non era solo il percorso sbagliato.** L'APK rotto aveva
