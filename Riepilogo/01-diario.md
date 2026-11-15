@@ -7,6 +7,39 @@ Voce più recente in cima.
 
 ---
 
+## 14-15 novembre 2026 — Verso il Play Store: D-U-N-S, privacy, cancellazione, firma
+
+**Deciso: prima il Play Store, poi la grafica interna e il server.** Il Play
+Store ha i tempi più lunghi e non dipendono da noi.
+- **Account sviluppatore a nome Moncucco S.S.A.** (organizzazione): evita il
+  test obbligatorio con 12 tester per 14 giorni chiesto agli account personali.
+  Serve il **D-U-N-S**: iCRIBIS lo vende (170-260 €) ma esiste la richiesta
+  **gratuita in 30 giorni** scrivendo a dunsnumber@cribis.com. Max l'ha
+  mandata il 15/11: numero atteso verso metà dicembre.
+- **Il server Hetzner non si compra ancora.** Oggi non c'è niente da farci
+  girare: dati e file stanno su Supabase, e la lettura con l'IA si può fare con
+  una funzione su Supabase. Il primo costo vero sarà **Supabase Pro (25 $/mese)**
+  quando ci saranno tester: col piano gratuito il progetto va in pausa dopo
+  una settimana senza uso. Hetzner quando arrivano fatture/SdI.
+
+**Fatto, per i requisiti di Google Play:**
+- **Cancellare l'account** dall'app (Impostazioni → Account → Cancella
+  l'account): toglie i file dall'archivio, poi la funzione `cancella_account()`
+  toglie utente e righe. Il quaderno sul telefono resta. *Da eseguire su
+  Supabase la parte nuova di `supabase/schema.sql`.*
+- **Informativa privacy** (`public/privacy.html`) e **pagina di cancellazione**
+  (`public/cancella-account.html`). Mancano sede legale, email di contatto e
+  regione del server Supabase: finché non ci sono **non si pubblicano**.
+- Il meteo ora manda a Open-Meteo le coordinate arrotondate (circa 1 km):
+  per la previsione basta, e l'informativa lo può dire.
+- **Firma per il Play Store**: chiave di caricamento in
+  `GREPPI/chiavi-agrizen/`, **fuori dal repo** (che è pubblico).
+  `npm run play` fa il pacchetto `.aab` firmato e alza da solo il numero di
+  versione. Se la chiave si perde, Google permette di sostituirla (firma
+  dell'app gestita da Google), ma è una seccatura: va salvata anche altrove.
+
+---
+
 ## 13 novembre 2026, sera — L'icona: il trattore arancio che impenna
 
 **Deciso: l'icona è il trattore che impenna, arancio, disegnato da Max.** Fra le

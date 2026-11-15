@@ -7,7 +7,7 @@ android {
         applicationId "it.agrizen.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 2
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -16,8 +16,24 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // La chiave di caricamento per Google Play sta FUORI dal repo (che è pubblico):
+    // android/keystore.properties dice dove. Senza quel file si fanno solo APK di prova.
+    def chiave = rootProject.file('keystore.properties')
+    signingConfigs {
+        if (chiave.exists()) {
+            release {
+                def p = new Properties()
+                chiave.withInputStream { p.load(it) }
+                storeFile file(p['storeFile'])
+                storePassword p['storePassword']
+                keyAlias p['keyAlias']
+                keyPassword p['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (chiave.exists()) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

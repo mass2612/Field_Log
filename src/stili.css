@@ -228,6 +228,17 @@ button,
   border-color: var(--rosso);
 }
 
+/* Per le azioni rare, che non devono saltare all'occhio (es. cancellare l'account). */
+.pulsante-testo {
+  background: none;
+  border: none;
+  color: var(--rosso);
+  text-decoration: underline;
+  padding: 8px 0;
+  font: inherit;
+  cursor: pointer;
+}
+
 button:disabled {
   opacity: 0.45;
   cursor: not-allowed;

@@ -59,6 +59,8 @@ export default defineConfig({
         // Tutto l'applicativo deve essere disponibile senza rete: in campo non c'è.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: base + 'index.html',
+        // Le pagine legali (richieste da Google Play) si aprono da sole, non dentro l'app.
+        navigateFallbackDenylist: [/privacy\.html$/, /cancella-account\.html$/],
         // I file della lingua di Tesseract sono grossi: si tengono da parte la
         // prima volta, e da lì in poi la lettura funziona anche senza rete.
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agrizen · Informativa privacy</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  :root { --verde: #1b5e20; --carta: #f7f5f0; --inchiostro: #1d2420; --tenue: #5d6b63; --bordo: #dcd8cf; }
+  @media (prefers-color-scheme: dark) {
+    :root { --verde: #8fcf8f; --carta: #161a18; --inchiostro: #e6e9e7; --tenue: #a3ada8; --bordo: #2d3330; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--carta); color: var(--inchiostro);
+         font: 16px/1.6 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 28px 16px 60px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  header img { width: 48px; height: 48px; border-radius: 12px; }
+  h1 { font-size: 26px; margin: 0; color: var(--verde); }
+  h2 { font-size: 19px; margin: 32px 0 6px; color: var(--verde); }
+  .aggiornata { color: var(--tenue); margin: 0 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--bordo); }
+  th { color: var(--tenue); font-weight: 600; }
+  a { color: var(--verde); }
+  .riquadro { border: 1px solid var(--bordo); border-radius: 12px; padding: 12px 16px; }
+  @media (max-width: 560px) { table, tbody, tr, td, th { display: block; } thead { display: none; }
+    tr { border-bottom: 1px solid var(--bordo); padding: 8px 0; } td { border: none; padding: 2px 0; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <img src="icon-192.png" alt="">
+  <h1>Informativa privacy di Agrizen</h1>
+</header>
+<p class="aggiornata">Ultimo aggiornamento: 15 novembre 2026</p>
+
+<p>Agrizen è un quaderno di campagna per agricoltori: note, lavori, trattamenti,
+documenti e magazzino dell'azienda agricola. Questa pagina spiega quali dati
+tratta, dove finiscono e come cancellarli, in parole semplici.</p>
+
+<div class="riquadro">
+  <strong>In breve</strong>
+  <ul>
+    <li>Senza account, <strong>tutto resta sul tuo telefono</strong>: noi non vediamo niente.</li>
+    <li>Con l'account, il quaderno viene copiato su un server per non perderlo, e lo vedi solo tu.</li>
+    <li>Niente pubblicità, niente profilazione, nessun dato venduto o ceduto a terzi.</li>
+    <li>Puoi cancellare l'account e tutti i dati sul server quando vuoi, dall'app.</li>
+  </ul>
+</div>
+
+<h2>Chi è il titolare</h2>
+<p>Moncucco Società Semplice Agricola, P.IVA 02481480024,
+[SEDE LEGALE DA COMPLETARE].<br>
+Per qualsiasi domanda sulla privacy: <a href="mailto:[EMAIL DA COMPLETARE]">[EMAIL DA COMPLETARE]</a>.</p>
+
+<h2>Quali dati e perché</h2>
+<table>
+  <thead><tr><th>Dato</th><th>A cosa serve</th><th>Dove sta</th></tr></thead>
+  <tbody>
+    <tr><td>Quello che scrivi nel quaderno: note, lavori, trattamenti, campi, prodotti, magazzino</td>
+        <td>È il quaderno stesso</td>
+        <td>Sul telefono. Con l'account, anche in copia sul server</td></tr>
+    <tr><td>Foto, documenti fotografati e registrazioni vocali</td>
+        <td>Leggere bolle e fatture, conservare le note vocali</td>
+        <td>Sul telefono. Con l'account, anche in copia sul server</td></tr>
+    <tr><td>Indirizzo email (e, se entri con Google, il nome dell'account Google)</td>
+        <td>Farti entrare e ritrovare i tuoi dati su un altro telefono</td>
+        <td>Sul server</td></tr>
+    <tr><td>Posizione dell'azienda (solo se la consenti)</td>
+        <td>Le previsioni del tempo</td>
+        <td>Sul telefono, e nella copia sul server se hai l'account</td></tr>
+  </tbody>
+</table>
+<p>La base giuridica è l'esecuzione del servizio che chiedi usando l'app
+(art. 6.1.b GDPR). L'account è facoltativo: l'app funziona anche senza.</p>
+<p><strong>Non raccogliamo</strong> statistiche d'uso, identificativi pubblicitari,
+contatti, né la posizione in continuo: la posizione si legge solo quando la
+chiedi tu, e una volta sola alla prima apertura per il meteo.</p>
+
+<h2>Servizi esterni usati</h2>
+<table>
+  <thead><tr><th>Servizio</th><th>Cosa riceve</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Supabase</strong> (server della copia e degli accessi), [REGIONE DA COMPLETARE]</td>
+        <td>Email, copia del quaderno, foto e registrazioni, solo se hai l'account</td></tr>
+    <tr><td><strong>Google</strong>: accesso con Google</td>
+        <td>Solo se scegli "Entra con Google": il collegamento al tuo account Google</td></tr>
+    <tr><td><strong>Google</strong>: dettatura a voce sui telefoni Android</td>
+        <td>L'audio mentre detti, trascritto dal riconoscimento vocale del telefono</td></tr>
+    <tr><td><strong>Open-Meteo</strong> (previsioni del tempo)</td>
+        <td>Le coordinate dell'azienda, arrotondate, per scaricare la previsione</td></tr>
+    <tr><td><strong>jsDelivr</strong> (scarica una volta i file per leggere le foto)</td>
+        <td>I normali dati tecnici di ogni scaricamento (indirizzo IP), non le foto</td></tr>
+    <tr><td><strong>GitHub Pages</strong> (pubblica la versione web)</td>
+        <td>I normali dati tecnici di ogni sito (indirizzo IP), se usi Agrizen dal browser</td></tr>
+  </tbody>
+</table>
+<p>La lettura delle foto dei documenti avviene <strong>sul telefono</strong>:
+le immagini non vengono mandate a servizi di lettura esterni.</p>
+
+<h2>Quanto tempo li teniamo</h2>
+<p>Sul server, finché hai l'account. Se lo cancelli, cancelliamo subito la copia
+del quaderno, le foto, le registrazioni e l'account stesso. Sul telefono i dati
+restano finché non disinstalli l'app.</p>
+
+<h2>Cancellare l'account e i dati</h2>
+<p>Dall'app: <em>Impostazioni → Account e copia dei dati → Cancella l'account</em>.
+Se non hai più l'app, scrivici: istruzioni nella pagina
+<a href="cancella-account.html">Cancellare l'account</a>.</p>
+
+<h2>I tuoi diritti</h2>
+<p>Puoi chiedere in ogni momento di vedere, correggere, esportare o cancellare i
+tuoi dati, e opporti al loro uso, scrivendo all'indirizzo qui sopra. Rispondiamo
+entro 30 giorni. Puoi anche rivolgerti al Garante per la protezione dei dati
+personali (<a href="https://www.garanteprivacy.it">garanteprivacy.it</a>).</p>
+
+<h2>Minori</h2>
+<p>Agrizen è uno strumento di lavoro per aziende agricole e non è pensato per
+chi ha meno di 16 anni.</p>
+
+<h2>Modifiche</h2>
+<p>Se cambia qualcosa di importante, lo diciamo nell'app prima che valga.</p>
+</main>
+</body>
+</html>

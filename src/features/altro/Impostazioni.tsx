@@ -411,6 +411,12 @@ function FarePiazzaPulita({ onEsporta }: { onEsporta: () => void }) {
         mostra il risultato, ma <strong>non salva niente</strong>. Così puoi fare tutte le prove
         che vuoi senza sporcare il quaderno.
       </p>
+
+      <p className="aiuto" style={{ textAlign: 'center', marginTop: 24 }}>
+        <a href="https://mass2612.github.io/Field_Log/privacy.html" target="_blank" rel="noreferrer">
+          Informativa privacy
+        </a>
+      </p>
     </>
   )
 }

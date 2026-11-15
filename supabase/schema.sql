@@ -59,3 +59,25 @@ create policy "allegati: solo i propri file" on storage.objects
   for all to authenticated
   using (bucket_id = 'allegati' and (storage.foldername(name))[1] = (select auth.uid())::text)
   with check (bucket_id = 'allegati' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- ---------------------------------------------------------------------------
+-- Cancellazione dell'account (aggiunto il 15/11/2026).
+--
+-- Google Play pretende che chi si registra possa cancellarsi da solo. L'app
+-- toglie prima i file (dall'archivio file: dal database non si può), poi
+-- chiama questa funzione, che toglie l'utente; le sue righe in `record` se ne
+-- vanno con lui (on delete cascade). Ognuno può cancellare solo sé stesso.
+-- Si può rieseguire.
+
+create or replace function public.cancella_account() returns void
+language plpgsql security definer set search_path = '' as $$
+begin
+  if auth.uid() is null then
+    raise exception 'non collegato';
+  end if;
+  delete from public.record where utente = auth.uid();
+  delete from auth.users where id = auth.uid();
+end $$;
+
+revoke all on function public.cancella_account() from public, anon;
+grant execute on function public.cancella_account() to authenticated;

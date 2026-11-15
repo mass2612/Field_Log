@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:guarda": "vitest",
     "pubblica": "node strumenti/pubblica.mjs",
-    "apk": "node strumenti/apk.mjs"
+    "apk": "node strumenti/apk.mjs",
+    "play": "node strumenti/play.mjs"
   },
   "dependencies": {
     "@capacitor-community/speech-recognition": "^7.0.1",

@@ -4,6 +4,7 @@ import { supabase } from '../../core/sync/client'
 import { sincronizza, ultimaCopia } from '../../core/sync/sincronizza'
 import { fmtIstante } from '../../core/i18n'
 import { entraConGoogle } from '../../core/sync/accessoGoogle'
+import { cancellaAccount } from '../../core/sync/cancellaAccount'
 
 /**
  * Account e copia dei dati.
@@ -20,6 +21,7 @@ export default function Account() {
   const [stato, setStato] = useState<string | null>(null)
   const [occupato, setOccupato] = useState(false)
   const [ultima, setUltima] = useState(ultimaCopia())
+  const [confermaCancella, setConfermaCancella] = useState(false)
 
   useEffect(() => {
     void supabase()
@@ -81,6 +83,14 @@ export default function Account() {
       setStato('Uscito. I dati restano su questo telefono.')
     })
 
+  const cancella = () =>
+    prova(async () => {
+      await cancellaAccount()
+      setConfermaCancella(false)
+      setUltima(null)
+      setStato('Account cancellato, con tutto quello che era sul server. Il quaderno su questo telefono resta.')
+    })
+
   return (
     <div className="scheda">
       <strong>☁️ Account e copia dei dati</strong>
@@ -103,6 +113,29 @@ export default function Account() {
               Esci
             </button>
           </div>
+          {confermaCancella ? (
+            <div className="pila" style={{ marginTop: 12 }}>
+              <p className="aiuto">
+                Cancello l'account e <strong>tutto quello che c'è sul server</strong>: copia del
+                quaderno, foto e registrazioni. Non si torna indietro. Sul telefono il quaderno resta.
+              </p>
+              <button className="pulsante-pericolo" disabled={occupato} onClick={() => void cancella()}>
+                {occupato ? 'Cancello…' : 'Sì, cancella tutto'}
+              </button>
+              <button className="pulsante-secondario" disabled={occupato} onClick={() => setConfermaCancella(false)}>
+                No, lascia stare
+              </button>
+            </div>
+          ) : (
+            <button
+              className="pulsante-testo"
+              style={{ marginTop: 12 }}
+              disabled={occupato}
+              onClick={() => setConfermaCancella(true)}
+            >
+              Cancella l'account
+            </button>
+          )}
         </>
       ) : (
         <>

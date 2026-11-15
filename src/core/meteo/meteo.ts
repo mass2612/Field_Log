@@ -130,7 +130,7 @@ export async function scaricaMeteo(
 ): Promise<MeteoGiorno | undefined> {
   try {
     const url =
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}` +
       `&current=temperature_2m,precipitation,weather_code,wind_speed_10m` +
       `&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m` +
       `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum` +
