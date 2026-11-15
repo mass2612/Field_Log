@@ -30,6 +30,7 @@ Store ha i tempi più lunghi e non dipendono da noi.
 - **Informativa privacy** (`public/privacy.html`) e **pagina di cancellazione**
   (`public/cancella-account.html`). Mancano sede legale, email di contatto e
   regione del server Supabase: finché non ci sono **non si pubblicano**.
+- **Sito agrizen.it** (repo separato `mass2612/agrizen-sito`, cartella `GREPPI/agrizen-sito`, GitHub Pages, gratis): presentazione, guida rapida, privacy, cancellazione. Supabase non è fatto per i siti. L'app web resta su github.io per ora; spostarla su app.agrizen.it cambierebbe l'indirizzo a chi l'ha già installata e ai ritorni di Google, quindi più avanti. Titolare Moncucco (sede dalla visura 2022), se ne occupa Max; email privacy@agrizen.it, inoltro Aruba alla sua; server Supabase in Irlanda (eu-west-1).
 - Il meteo ora manda a Open-Meteo le coordinate arrotondate (circa 1 km):
   per la previsione basta, e l'informativa lo può dire.
 - **Firma per il Play Store**: chiave di caricamento in

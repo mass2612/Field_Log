@@ -413,7 +413,7 @@ function FarePiazzaPulita({ onEsporta }: { onEsporta: () => void }) {
       </p>
 
       <p className="aiuto" style={{ textAlign: 'center', marginTop: 24 }}>
-        <a href="https://mass2612.github.io/Field_Log/privacy.html" target="_blank" rel="noreferrer">
+        <a href="https://agrizen.it/privacy.html" target="_blank" rel="noreferrer">
           Informativa privacy
         </a>
       </p>
